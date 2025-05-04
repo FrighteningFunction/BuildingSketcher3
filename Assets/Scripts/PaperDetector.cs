@@ -15,8 +15,11 @@ public class PaperDetector : MonoBehaviour
 
     private readonly string[] requiredMarkers = { "TopLeft", "TopRight", "BottomLeft", "BottomRight" };
 
+    void Awake() => Debug.Log("PaperDetector.Awake");
+
     void OnEnable()
     {
+        Debug.Log("PaperDetector enabled");
         m_ImageManager.trackablesChanged.AddListener(OnChanged);
     }
 
