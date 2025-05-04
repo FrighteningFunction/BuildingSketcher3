@@ -6,6 +6,8 @@
 [Bb]uilds/
 [Ll]ogs/
 [Mm]emoryCaptures/
+.utmp/
+BuildingSketcher3_BurstDebugInformation_DoNotShip/
 
 # Unity generated files
 sysinfo.txt
