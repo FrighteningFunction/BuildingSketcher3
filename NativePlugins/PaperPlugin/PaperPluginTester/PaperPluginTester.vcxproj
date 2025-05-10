@@ -130,9 +130,21 @@
     <ClCompile Include="PaperPluginTester.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PaperPlugin1\PaperPlugin1.vcxproj">
+      <Project>{2f6b5f3a-0871-4683-a081-a12d49462366}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\PaperPlugin\PaperPlugin.vcxproj">
       <Project>{cc11c966-5f97-42d7-8907-4afd56129c40}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="test_image.rgba">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

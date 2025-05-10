@@ -2,6 +2,9 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
+      <FullPath>C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\x64\Debug\PaperPlugin1.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
       <FullPath>C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\x64\Debug\PaperPluginTester.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
