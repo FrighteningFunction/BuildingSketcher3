@@ -1,0 +1,9 @@
+﻿  The vcpkg manifest was disabled, but we found a manifest file in C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  pch.cpp
+  dllmain.cpp
+  PaperPlugin1.cpp
+  Generating Code...
+     Creating library C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\x64\Debug\PaperPlugin1.lib and object C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\x64\Debug\PaperPlugin1.exp
+  PaperPlugin1.vcxproj -> C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\x64\Debug\PaperPlugin1.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
