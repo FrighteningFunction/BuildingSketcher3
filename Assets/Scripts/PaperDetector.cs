@@ -9,9 +9,16 @@ public class PaperDetector : MonoBehaviour
     public ARTrackedImageManager m_ImageManager;
     public TextMeshProUGUI detectionStatusText;
     public GameObject paperPlanePrefab;
+    public GameObject testCube;
 
     private Dictionary<string, ARTrackedImage> trackedImages = new();
+
+    private Dictionary<string, GameObject> spawnedCubes = new();
+
+
     private GameObject spawnedPlane;
+
+    
 
     private readonly string[] requiredMarkers = { "TopLeft", "TopRight", "BottomLeft", "BottomRight" };
 
@@ -37,17 +44,41 @@ public class PaperDetector : MonoBehaviour
         foreach (var img in eventArgs.updated)
             TryTrack(img);
 
+        //remove
         foreach (var removed in eventArgs.removed)
         {
             string name = removed.Value.referenceImage.name;
             if (trackedImages.ContainsKey(name))
             {
                 trackedImages.Remove(name);
+                DeleteCube(name); // Delete the cube associated with the marker
                 Debug.Log($"Marker {name} removed.");
             }
         }
 
-        UpdatePaperStatus();
+        //UpdatePaperStatus();
+
+        UpdatePlaceholdersAndUI();
+    }
+
+    private void DeleteCube(string name)
+    {
+        if (spawnedCubes.TryGetValue(name, out var cube))
+        {
+            Destroy(cube);
+            spawnedCubes.Remove(name);
+        }
+    }
+
+    private void AddCube(ARTrackedImage img)
+    {
+        string name = img.referenceImage.name;
+        if (!spawnedCubes.ContainsKey(name))
+        {
+            GameObject cube = Instantiate(testCube, img.transform.position, img.transform.rotation);
+            spawnedCubes[name] = cube;
+            Debug.Log($"Spawned cube for {name}");
+        }
     }
 
     private void TryTrack(ARTrackedImage img)
@@ -58,6 +89,7 @@ public class PaperDetector : MonoBehaviour
             if (System.Array.Exists(requiredMarkers, m => m == name))
             {
                 trackedImages[name] = img;
+                AddCube(img);
                 Debug.Log($"Marker {name} tracked.");
             }
         }
@@ -114,5 +146,23 @@ public class PaperDetector : MonoBehaviour
             }
         }
         return true;
+    }
+
+    void UpdatePlaceholdersAndUI()
+    {
+        // Update each cube's position/rotation
+        foreach (var kv in spawnedCubes)
+        {
+            var name = kv.Key;
+            var cube = kv.Value;
+            var img = trackedImages[name];
+            cube.transform.SetPositionAndRotation(img.transform.position, img.transform.rotation);
+        }
+
+        // Update status text
+        if (trackedImages.Count == requiredMarkers.Length)
+            detectionStatusText.text = "All Markers Tracked";
+        else
+            detectionStatusText.text = $"Tracking {trackedImages.Count}/4";
     }
 }

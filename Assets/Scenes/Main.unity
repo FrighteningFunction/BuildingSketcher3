@@ -1044,6 +1044,8 @@ MonoBehaviour:
   detectionStatusText: {fileID: 996872194}
   paperPlanePrefab: {fileID: 8989372755569911624, guid: db9f635c06d1e634b85d85fa82453843,
     type: 3}
+  testCube: {fileID: 1427077025183939201, guid: 72b43c9202ecaf641b2457a77a1e45e9,
+    type: 3}
 --- !u!114 &2001374502 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6402244310720262706, guid: 48cb3fb68c91eb94999fd99957eb0cae,
