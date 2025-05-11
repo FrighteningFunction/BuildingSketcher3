@@ -1,8 +1,8 @@
 @echo off
 REM Copy PaperPlugin.dll to Unity Plugins folder
 
-set "SRC=NativePlugins\build\Release\PaperPlugin.dll"
-set "DST=Assets\Plugins\x86_64\PaperPlugin.dll"
+set "SRC=NativePlugins\build\Debug\PaperPlugin1.dll"
+set "DST=Assets\Plugins\x86_64\PaperPlugin1.dll"
 
 echo Copying %SRC% to %DST%...
 copy /Y "%SRC%" "%DST%"
