@@ -146,6 +146,15 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </CopyFileToFolders>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="test_image_drawing.txt" />
+    <Text Include="test_image.txt" />
+    <Text Include="test_image_tilted.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test_image_drawing.rgba" />
+    <None Include="test_image_tilted.rgba" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

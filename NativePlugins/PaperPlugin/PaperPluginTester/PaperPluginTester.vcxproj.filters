@@ -22,4 +22,13 @@
   <ItemGroup>
     <CopyFileToFolders Include="test_image.rgba" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="test_image.txt" />
+    <Text Include="test_image_drawing.txt" />
+    <Text Include="test_image_tilted.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test_image_drawing.rgba" />
+    <None Include="test_image_tilted.rgba" />
+  </ItemGroup>
 </Project>

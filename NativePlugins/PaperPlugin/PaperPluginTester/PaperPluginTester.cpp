@@ -8,7 +8,7 @@ int main() {
     const int width = 640;
     const int height = 480;
     const int channels = 4; // RGBA
-    const char* imagePath = "test_image.rgba"; // must be raw RGBA data
+    const char* imagePath = "test_image_drawing.rgba"; // must be raw RGBA data
 
     // Load raw RGBA image from file
     std::ifstream file(imagePath, std::ios::binary);
