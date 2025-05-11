@@ -5,7 +5,11 @@
 #include "PaperPlugin.h"
 #include <opencv2/opencv.hpp>
 
-
+extern "C" {
+    bool FindPaperCorners(unsigned char* imageData,
+        int width, int height,
+        float* outCorners);
+}
 
 bool FindPaperCorners(unsigned char* imageData,
     int width, int height,

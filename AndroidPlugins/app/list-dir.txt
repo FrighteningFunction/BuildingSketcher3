@@ -1,0 +1,87 @@
+Folder PATH listing
+Volume serial number is 8AC3-39ED
+C:.
++---.cxx
+¦   +---Debug
+¦   ¦   +---145i5k1a
+¦   ¦       +---x86
+¦   ¦           +---.cmake
+¦   ¦           ¦   +---api
+¦   ¦           ¦       +---v1
+¦   ¦           ¦           +---query
+¦   ¦           ¦           ¦   +---client-agp
+¦   ¦           ¦           +---reply
+¦   ¦           +---CMakeFiles
+¦   ¦               +---3.22.1-g37088a8-dirty
+¦   ¦               ¦   +---CompilerIdC
+¦   ¦               ¦   ¦   +---tmp
+¦   ¦               ¦   +---CompilerIdCXX
+¦   ¦               ¦       +---tmp
+¦   ¦               +---CMakeTmp
+¦   ¦               +---paperplugin.dir
+¦   +---RelWithDebInfo
+¦   ¦   +---b4q411zs
+¦   ¦       +---x86
+¦   ¦           +---.cmake
+¦   ¦           ¦   +---api
+¦   ¦           ¦       +---v1
+¦   ¦           ¦           +---query
+¦   ¦           ¦           ¦   +---client-agp
+¦   ¦           ¦           +---reply
+¦   ¦           +---CMakeFiles
+¦   ¦               +---3.22.1-g37088a8-dirty
+¦   ¦               ¦   +---CompilerIdC
+¦   ¦               ¦   ¦   +---tmp
+¦   ¦               ¦   +---CompilerIdCXX
+¦   ¦               ¦       +---tmp
+¦   ¦               +---CMakeTmp
+¦   ¦               +---paperplugin.dir
+¦   +---tools
+¦       +---debug
+¦       ¦   +---x86
+¦       +---release
+¦           +---x86
++---build
+¦   +---intermediates
+¦       +---cxx
+¦           +---Debug
+¦           ¦   +---145i5k1a
+¦           ¦       +---logs
+¦           ¦       ¦   +---x86
+¦           ¦       +---obj
+¦           ¦           +---x86
+¦           +---RelWithDebInfo
+¦               +---b4q411zs
+¦                   +---logs
+¦                   ¦   +---x86
+¦                   +---obj
+¦                       +---x86
++---src
+    +---androidTest
+    ¦   +---java
+    ¦       +---com
+    ¦           +---example
+    ¦               +---paperplugin
+    +---main
+    ¦   +---cpp
+    ¦   +---java
+    ¦   ¦   +---com
+    ¦   ¦       +---example
+    ¦   ¦           +---paperplugin
+    ¦   +---res
+    ¦       +---drawable
+    ¦       +---layout
+    ¦       +---mipmap-anydpi
+    ¦       +---mipmap-hdpi
+    ¦       +---mipmap-mdpi
+    ¦       +---mipmap-xhdpi
+    ¦       +---mipmap-xxhdpi
+    ¦       +---mipmap-xxxhdpi
+    ¦       +---values
+    ¦       +---values-night
+    ¦       +---xml
+    +---test
+        +---java
+            +---com
+                +---example
+                    +---paperplugin
