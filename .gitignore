@@ -75,19 +75,24 @@ Assets/StreamingAssets/aa/
 
 NativePlugins/build/
 
-Assets\Plugins\x86_64\opencv_world4110.dll
+Assets/Plugins\x86_64\opencv_world4110.dll
 Assets/Plugins/x86_64/opencv_world4110.dll
 Assets/Plugins/x86_64/opencv_world4110.dll.meta
 Assets/Plugins/x86_64/opencv_world4110d.dll
 
 ## Android Module relevant files
 
-/AndroidPlugins/paperplugin/.gradle/
-/AndroidPlugins/paperplugin/build/
-/AndroidPlugins/paperplugin/local.properties
-/AndroidPlugins/paperplugin/*.iml
-/AndroidPlugins/paperplugin/.idea/
-/AndroidPlugins/paperplugin/gradle/wrapper/gradle-wrapper.jar
-/AndroidPlugins/.gradle
-/AndroidPlugins/.gradle
-/AndroidPlugins/.gradle
+AndroidPlugins/paperplugin/.gradle/
+AndroidPlugins/paperplugin/build/
+AndroidPlugins/paperplugin/local.properties
+AndroidPlugins/paperplugin/*.iml
+AndroidPlugins/paperplugin/.idea/
+AndroidPlugins/paperplugin/gradle/wrapper/gradle-wrapper.jar
+AndroidPlugins/.gradle
+
+
+## opencv files
+
+AndroidPlugins/app/src/main/cpp/OpenCV-android-sdk
+
+AndroidPlugins/opencv
