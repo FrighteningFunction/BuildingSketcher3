@@ -88,3 +88,6 @@ Assets/Plugins/x86_64/opencv_world4110d.dll
 /AndroidPlugins/paperplugin/*.iml
 /AndroidPlugins/paperplugin/.idea/
 /AndroidPlugins/paperplugin/gradle/wrapper/gradle-wrapper.jar
+/AndroidPlugins/.gradle
+/AndroidPlugins/.gradle
+/AndroidPlugins/.gradle
