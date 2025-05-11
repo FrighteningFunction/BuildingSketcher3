@@ -74,3 +74,8 @@ Assets/StreamingAssets/aa/
 # C++ plugin files
 
 NativePlugins/build/
+
+Assets\Plugins\x86_64\opencv_world4110.dll
+Assets/Plugins/x86_64/opencv_world4110.dll
+Assets/Plugins/x86_64/opencv_world4110.dll.meta
+Assets/Plugins/x86_64/opencv_world4110d.dll

@@ -1,168 +1,149 @@
-using System.Collections.Generic;
+﻿using System;
+using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
-using TMPro;
 
+/// <summary>
+/// High-level controller that captures the camera frame, runs the native paper-corner
+/// detector, and spawns / moves four cubes at the detected corner positions.
+/// </summary>
 public class PaperDetector : MonoBehaviour
 {
-    public ARTrackedImageManager m_ImageManager;
-    public TextMeshProUGUI detectionStatusText;
-    public GameObject paperPlanePrefab;
-    public GameObject testCube;
+    /* ---------- 1. native-plugin import ---------- */
+    [DllImport("PaperPlugin1")]
+    private static extern bool FindPaperCorners(
+        byte[] imageData,
+        int width,
+        int height,
+        float[] outCorners);
 
-    private Dictionary<string, ARTrackedImage> trackedImages = new();
+    /* ---------- 2. scene references ---------- */
+    [SerializeField] ARCameraManager cameraManager;
+    [SerializeField] GameObject cornerPrefab;
+    [SerializeField] Transform cornersParent;
 
-    private Dictionary<string, GameObject> spawnedCubes = new();
+    /* ---------- 3. runtime fields ---------- */
+    Texture2D cameraTexture;
+    GameObject[] cornerCubes = new GameObject[4];
 
+    /* ---------- Unity lifecycle hooks ---------- */
+    void Awake() => InitializeCornerCubes();
+    void OnEnable() => cameraManager.frameReceived += OnCameraFrame;
+    void OnDisable() => cameraManager.frameReceived -= OnCameraFrame;
 
-    private GameObject spawnedPlane;
+    /* ============================================================= */
+    /* =========== Main per-frame callback, now bite-sized ========== */
+    /* ============================================================= */
 
-    
-
-    private readonly string[] requiredMarkers = { "TopLeft", "TopRight", "BottomLeft", "BottomRight" };
-
-    void Awake() => Debug.Log("PaperDetector.Awake");
-
-    void OnEnable()
+    /// <summary>
+    /// Master callback invoked every time ARFoundation provides a new camera frame.
+    /// </summary>
+    void OnCameraFrame(ARCameraFrameEventArgs args)
     {
-        Debug.Log("PaperDetector enabled");
-        m_ImageManager.trackablesChanged.AddListener(OnChanged);
+        // 1) Acquire the CPU image
+        if (!TryGetCpuImage(out var cpuImage)) return;
+
+        // 2) Convert it to a Texture2D in RGBA32 format
+        ConvertCpuImageToTexture(cpuImage);
+
+        // 3) Extract managed byte[] for the plugin call
+        byte[] rgbaBytes = GetTextureBytes(cameraTexture);
+
+        // 4) Ask the native plugin for the paper corners
+        float[] corners = new float[8];
+        bool found = FindPaperCorners(
+            rgbaBytes, cameraTexture.width, cameraTexture.height, corners);
+
+        // 5) If detected, move / show the corner cubes
+        if (found) UpdateCornerCubes(corners);
     }
 
-    void OnDisable()
+    /* ============================================================= */
+    /* ======================  Helper methods  ===================== */
+    /* ============================================================= */
+
+    // ───────────────────────────────────────────────────────────────
+    // Initializes four cubes (one for each corner) when the scene loads.
+    // ───────────────────────────────────────────────────────────────
+    void InitializeCornerCubes()
     {
-        m_ImageManager.trackablesChanged.RemoveListener(OnChanged);
-    }
-
-    void OnChanged(ARTrackablesChangedEventArgs<ARTrackedImage> eventArgs)
-    {
-        // Add or update tracked markers
-        foreach (var img in eventArgs.added)
-            TryTrack(img);
-
-        foreach (var img in eventArgs.updated)
-            TryTrack(img);
-
-        //remove
-        foreach (var removed in eventArgs.removed)
+        for (int i = 0; i < 4; i++)
         {
-            string name = removed.Value.referenceImage.name;
-            if (trackedImages.ContainsKey(name))
-            {
-                trackedImages.Remove(name);
-                DeleteCube(name); // Delete the cube associated with the marker
-                Debug.Log($"Marker {name} removed.");
-            }
-        }
-
-        //UpdatePaperStatus();
-
-        UpdatePlaceholdersAndUI();
-    }
-
-    private void DeleteCube(string name)
-    {
-        if (spawnedCubes.TryGetValue(name, out var cube))
-        {
-            Destroy(cube);
-            spawnedCubes.Remove(name);
-        }
-    }
-
-    private void AddCube(ARTrackedImage img)
-    {
-        string name = img.referenceImage.name;
-        if (!spawnedCubes.ContainsKey(name))
-        {
-            GameObject cube = Instantiate(testCube, img.transform.position, img.transform.rotation);
-            spawnedCubes[name] = cube;
-            Debug.Log($"Spawned cube for {name}");
+            cornerCubes[i] = Instantiate(cornerPrefab, cornersParent);
+            cornerCubes[i].name = $"Corner_{i}";
+            cornerCubes[i].SetActive(false);         // hidden until first detection
         }
     }
 
-    private void TryTrack(ARTrackedImage img)
+    // ───────────────────────────────────────────────────────────────
+    // Attempts to get the most recent XRCpuImage. Returns true if successful.
+    // Automatically disposes the image if conversion fails later on.
+    // ───────────────────────────────────────────────────────────────
+    bool TryGetCpuImage(out XRCpuImage image) =>
+        cameraManager.TryAcquireLatestCpuImage(out image);
+
+    // ───────────────────────────────────────────────────────────────
+    // Converts the acquired CPU image into an RGBA32 Texture2D,
+    // re-using an existing Texture2D if the resolution hasn’t changed.
+    // ───────────────────────────────────────────────────────────────
+    void ConvertCpuImageToTexture(XRCpuImage image)
     {
-        if (img.trackingState == TrackingState.Tracking)
+        var conv = new XRCpuImage.ConversionParams
         {
-            string name = img.referenceImage.name;
-            if (System.Array.Exists(requiredMarkers, m => m == name))
-            {
-                trackedImages[name] = img;
-                AddCube(img);
-                Debug.Log($"Marker {name} tracked.");
-            }
+            inputRect = new RectInt(0, 0, image.width, image.height),
+            outputDimensions = new Vector2Int(image.width, image.height),
+            outputFormat = TextureFormat.RGBA32,
+            transformation = XRCpuImage.Transformation.MirrorY
+        };
+
+        // Ensure we have a Texture2D of correct size/format
+        if (cameraTexture == null ||
+            cameraTexture.width != image.width ||
+            cameraTexture.height != image.height)
+        {
+            cameraTexture = new Texture2D(image.width, image.height,
+                                          TextureFormat.RGBA32, false);
         }
+
+        // Allocate a temporary buffer and perform the conversion
+        int byteCount = image.GetConvertedDataSize(conv);
+        using (var buffer = new NativeArray<byte>(byteCount, Allocator.Temp))
+        {
+            image.Convert(conv, buffer);
+            cameraTexture.LoadRawTextureData(buffer);
+            cameraTexture.Apply();
+        }
+
+        image.Dispose();   // always dispose the XRCpuImage
     }
 
-    private void UpdatePaperStatus()
+    // ───────────────────────────────────────────────────────────────
+    // Returns the Texture2D pixel data as a managed byte[] so it can
+    // be passed to the unmanaged plugin (P/Invoke requires managed memory).
+    // ───────────────────────────────────────────────────────────────
+    static byte[] GetTextureBytes(Texture2D tex) =>
+        tex.GetRawTextureData<byte>().ToArray();
+
+    // ───────────────────────────────────────────────────────────────
+    // Converts the 4 screen-space corner coordinates returned by the plugin
+    // into 3D world positions and places the cubes there.
+    // ───────────────────────────────────────────────────────────────
+    void UpdateCornerCubes(float[] corners)
     {
-        if (AllMarkersFound())
+        for (int i = 0; i < 4; i++)
         {
-            detectionStatusText.text = "Paper Detected!";
+            Vector2 screen = new(
+                corners[i * 2 + 0],
+                corners[i * 2 + 1]);
 
-            Vector3 center = Vector3.zero;
-            foreach (var img in trackedImages.Values)
-            {
-                center += img.transform.position;
-            }
-            center /= trackedImages.Count;
+            // Ray-cast 0.5 m forward from the camera through that pixel
+            var ray = Camera.main.ScreenPointToRay(screen);
+            Vector3 pos = ray.GetPoint(0.5f);
 
-            Quaternion rotation = trackedImages["TopLeft"].transform.rotation;
-
-            if (spawnedPlane == null)
-            {
-                spawnedPlane = Instantiate(paperPlanePrefab, center, rotation);
-                Debug.Log("Spawned paper plane.");
-            }
-            else
-            {
-                spawnedPlane.transform.SetPositionAndRotation(center, rotation);
-                Debug.Log("Updated paper plane.");
-            }
+            cornerCubes[i].transform.position = pos;
+            cornerCubes[i].SetActive(true);
         }
-        else
-        {
-            detectionStatusText.text = $"Paper Not Detected ({trackedImages.Count}/4)";
-
-            if (spawnedPlane != null)
-            {
-                Destroy(spawnedPlane);
-                spawnedPlane = null;
-                Debug.Log("Destroyed paper plane.");
-            }
-        }
-    }
-
-
-    private bool AllMarkersFound()
-    {
-        foreach (var marker in requiredMarkers)
-        {
-            if (!trackedImages.ContainsKey(marker))
-            {
-                Debug.Log($"Missing: {marker}");
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void UpdatePlaceholdersAndUI()
-    {
-        // Update each cube's position/rotation
-        foreach (var kv in spawnedCubes)
-        {
-            var name = kv.Key;
-            var cube = kv.Value;
-            var img = trackedImages[name];
-            cube.transform.SetPositionAndRotation(img.transform.position, img.transform.rotation);
-        }
-
-        // Update status text
-        if (trackedImages.Count == requiredMarkers.Length)
-            detectionStatusText.text = "All Markers Tracked";
-        else
-            detectionStatusText.text = $"Tracking {trackedImages.Count}/4";
     }
 }
