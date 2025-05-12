@@ -180,7 +180,7 @@ public class PaperDetector : MonoBehaviour
             prevPos[i] = worldPos[i];
             usedFallback[i] = !hitPlane;
 
-            Debug.Log($" Corner[{i}] → World: {worldPos[i]:F2} {(hitPlane ? "✅" : "❌")}");
+            Debug.Log($" Corner[{i}] → World: {worldPos[i]:F2} {(hitPlane ? "YES" : "NO")}");
         }
 
         for (int i = 0; i < 4; i++)
