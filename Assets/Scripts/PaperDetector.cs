@@ -134,7 +134,7 @@ public class PaperDetector : MonoBehaviour
             inputRect = new RectInt(0, 0, img.width, img.height),
             outputDimensions = new Vector2Int(img.width, img.height),
             outputFormat = TextureFormat.RGBA32,
-            transformation = XRCpuImage.Transformation.MirrorY
+            transformation = XRCpuImage.Transformation.MirrorY | XRCpuImage.Transformation.MirrorX
         };
 
         if (camTex == null || camTex.width != img.width || camTex.height != img.height)
