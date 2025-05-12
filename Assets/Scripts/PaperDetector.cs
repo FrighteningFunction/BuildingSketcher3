@@ -15,6 +15,7 @@ public class PaperDetectorDebug : MonoBehaviour
     [SerializeField] ARRaycastManager raycastManager;
     [SerializeField] GameObject cubePrefab;
     [SerializeField] Transform cubesParent;
+    [SerializeField] ARPlaneManager arPlaneManager;
 
     /* ---------- internals ---------- */
     Texture2D camTex;
@@ -51,6 +52,18 @@ public class PaperDetectorDebug : MonoBehaviour
         // order them TL, TR, BR, BL for repeatable cube assignment
         Vector2[] ordered = OrderCorners(imgCorners);
         PlaceCubes(ordered);
+    }
+
+    /* Quick heuristic ordering: left-most two = top row, sort by Y */
+    private Vector2[] OrderCorners(Vector2[] c)
+    {
+        // sort by Y ascending
+        Array.Sort(c, (a, b) => a.y.CompareTo(b.y));
+        // first two are top row → sort those by X
+        if (c[0].x > c[1].x) (c[0], c[1]) = (c[1], c[0]);
+        // last two are bottom row → sort by X
+        if (c[2].x < c[3].x) (c[2], c[3]) = (c[3], c[2]);
+        return c;
     }
 
     /* ================================================================= */
@@ -90,71 +103,78 @@ public class PaperDetectorDebug : MonoBehaviour
     /* -- project each corner, try AR raycast -- */
     void PlaceCubes(Vector2[] imgCorners)
     {
-        bool allHitSamePlane = true;
-        TrackableId? firstPlane = null;
+        // temp storage per‐corner
+        var worldPos = new Vector3[4];
+        var usedFallback = new bool[4];
 
-        Vector3[] worldPos = new Vector3[4];
-        bool[] usedFallback = new bool[4];
+        // the one "master" plane we discovered on corner 0
+        TrackableId? masterPlaneId = null;
 
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < imgCorners.Length; i++)
         {
             Vector2 scr = ImageToScreen(imgCorners[i]);
+            bool didPlaneHit = false;
+            Vector3 hitPos = Vector3.zero;
 
-            if (raycastManager.Raycast(scr, hits, TrackableType.Planes | TrackableType.PlaneWithinPolygon
-                                                                          | TrackableType.FeaturePoint
-                                                                          | TrackableType.Depth))
+            // cast against AR planes only (within the polygon boundary)
+            if (raycastManager.Raycast(scr, hits, TrackableType.PlaneWithinPolygon))
             {
-                var hit = hits[0];
-                worldPos[i] = hit.pose.position;
-                usedFallback[i] = false;
+                ARRaycastHit chosenHit = default;
 
-                if (firstPlane == null) firstPlane = hit.trackableId;
-                else if (firstPlane != hit.trackableId) allHitSamePlane = false;
+                if (masterPlaneId.HasValue)
+                {
+                    // try to find a hit on our same first plane
+                    var samePlaneHits = hits.Where(h => h.trackableId == masterPlaneId.Value);
+                    if (samePlaneHits.Any())
+                        chosenHit = samePlaneHits.First();
+                }
+                else
+                {
+                    // first corner: grab whatever plane came back
+                    chosenHit = hits[0];
+                    masterPlaneId = chosenHit.trackableId;
+                }
 
-                Debug.Log($"Ray[{i}] plane hit @ {worldPos[i]}  dist={hit.distance:F2}");
+                // if we have a valid hit on our one plane, lock to it
+                if (chosenHit.trackableId == masterPlaneId)
+                {
+                    hitPos = chosenHit.pose.position;
+                    didPlaneHit = true;
+                }
+            }
+
+            // fallback if we never got a consistent plane hit
+            if (!didPlaneHit)
+            {
+                hitPos = Camera.main.ScreenPointToRay(scr).GetPoint(0.5f);
+                usedFallback[i] = true;
             }
             else
             {
-                worldPos[i] = Camera.main.ScreenPointToRay(scr).GetPoint(0.5f);
-                usedFallback[i] = true;
-                allHitSamePlane = false;          // by definition
-                Debug.Log($"Ray[{i}] fallback 0.5m  pos={worldPos[i]}");
+                usedFallback[i] = false;
             }
+
+            worldPos[i] = hitPos;
         }
 
-        // move / color cubes
-        for (int i = 0; i < 4; ++i)
+        // finally, move & color the cubes
+        for (int i = 0; i < cubes.Length; i++)
         {
-            cubes[i].transform.position = worldPos[i];
-            cubes[i].SetActive(true);
+            var cube = cubes[i];
+            cube.transform.position = worldPos[i];
+            cube.SetActive(true);
 
-            var rend = cubes[i].GetComponentInChildren<Renderer>();
+            var rend = cube.GetComponentInChildren<Renderer>();
             rend.material.color = usedFallback[i] ? fallbackColor : lockedColor;
         }
-
-        Debug.Log(allHitSamePlane
-            ? "All corners anchored on same plane."
-            : "At least one corner used fallback depth or different plane.");
     }
 
     /* ---------- conversions ---------- */
 
     Vector2 ImageToScreen(Vector2 img)
-    {
-        float nx = img.x / camTex.width;
-        float ny = 1f - (img.y / camTex.height);     // flip Y
-        return new Vector2(nx * Screen.width, ny * Screen.height);
-    }
-
-    /* Quick heuristic ordering: left-most two = top row, sort by Y */
-    static Vector2[] OrderCorners(Vector2[] c)
-    {
-        // sort by Y ascending
-        Array.Sort(c, (a, b) => a.y.CompareTo(b.y));
-        // first two are top row → sort those by X
-        if (c[0].x > c[1].x) (c[0], c[1]) = (c[1], c[0]);
-        // last two are bottom row → sort by X
-        if (c[2].x < c[3].x) (c[2], c[3]) = (c[3], c[2]);
-        return c;
-    }
+        {
+            float nx = img.x / camTex.width;
+            float ny = 1f - (img.y / camTex.height);     // flip Y
+            return new Vector2(nx * Screen.width, ny * Screen.height);
+        }
 }
