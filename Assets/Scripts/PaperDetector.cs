@@ -14,22 +14,26 @@ public class PaperDetector : MonoBehaviour
     /* ---------- Inspector refs ---------- */
     [SerializeField] ARCameraManager cameraManager;
     [SerializeField] ARRaycastManager raycastManager;
-    [SerializeField] GameObject cubePrefab;
-    [SerializeField] Transform cubesParent;
     [SerializeField] ARPlaneManager arPlaneManager;
-
-
     [SerializeField] RawImage debugImage;
+
+    [Header("Line Settings")]
+    [SerializeField] Material lineMaterial;
+    [SerializeField] float lineWidth = 0.005f;
 
     /* ---------- internals ---------- */
     Texture2D camTex;
-    readonly GameObject[] cubes = new GameObject[4];
+    lineSegment[] segments = new lineSegment[4];
     static readonly List<ARRaycastHit> hits = new();
 
-    readonly Color lockedColor = Color.gray;
-    readonly Color fallbackColor = Color.yellow;
+    struct lineSegment
+    {
+        public LineRenderer lr;
+        public bool end0Fallback;
+        public bool end1Fallback;
+    }
 
-    void Awake() => InitCubes();
+    void Awake() => InitLines();
     void OnEnable() => cameraManager.frameReceived += OnFrame;
     void OnDisable() => cameraManager.frameReceived -= OnFrame;
 
@@ -38,54 +42,57 @@ public class PaperDetector : MonoBehaviour
     /* ================================================================= */
     void OnFrame(ARCameraFrameEventArgs _)
     {
-        Debug.Log($"[OnFrame] camTex before = {(camTex == null ? "null" : camTex.width + "x" + camTex.height)}");
+        // 1) Acquire camera image
         if (!cameraManager.TryAcquireLatestCpuImage(out var cpu))
-        {
-            Debug.Log("[OnFrame] No CPU image acquired");
             return;
-        }
 
         UpdateTexture(cpu);
-        Debug.Log($"[OnFrame] camTex after = {camTex.width} x {camTex.height}");
-        byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
-        Debug.Log($"[OnFrame] RGBA byte count = {rgba.Length}");
 
+        // 2) Find paper corners in image space
+        byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
         if (!PaperPlugin.FindPaperCorners(
-                 rgba, camTex.width, camTex.height,
-                 out Vector2[] imgCorners))
+                rgba, camTex.width, camTex.height,
+                out Vector2[] imgCorners))
         {
-            Debug.Log("Plugin: paper NOT found.");
+            // nothing found: hide lines
+            foreach (var seg in segments)
+                seg.lr.enabled = false;
             return;
         }
 
-        Debug.Log($"Plugin corners img px: {string.Join(" ", imgCorners.Select(v => $"[{v.x:F0},{v.y:F0}]"))}");
-
+        // 3) Order the corners (CW)
         Vector2[] ordered = OrderCorners(imgCorners);
-        Debug.Log($"Ordered corners img px: {string.Join(" ", ordered.Select(v => $"[{v.x:F0},{v.y:F0}]"))}");
 
-        PlaceCubes(ordered);
+        // 4) Project + raycast + draw
+        PlaceLines(ordered);
     }
 
     /* Quick heuristic ordering: Sort by angle around center */
-    private Vector2[] OrderCorners(Vector2[] c)
+    Vector2[] OrderCorners(Vector2[] c)
     {
         Vector2 center = c.Aggregate(Vector2.zero, (a, b) => a + b) / 4f;
-        var sorted = c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
-        Debug.Log($"[OrderCorners] center = {center}, sorted = {string.Join(" ", sorted.Select(v => $"({v.x:F0},{v.y:F0})"))}");
-        return sorted;
+        return c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
     }
 
     /* ================================================================= */
     /*                            HELPERS                                */
     /* ================================================================= */
-
-    void InitCubes()
+    void InitLines()
     {
         for (int i = 0; i < 4; ++i)
         {
-            cubes[i] = Instantiate(cubePrefab, cubesParent);
-            cubes[i].name = $"Cube_{i}";
-            cubes[i].SetActive(false);
+            var go = new GameObject($"PaperEdge_{i}");
+            var lr = go.AddComponent<LineRenderer>();
+            lr.material = lineMaterial;
+            lr.positionCount = 2;
+            lr.startWidth = lr.endWidth = lineWidth;
+            lr.useWorldSpace = true;
+            lr.loop = false;
+            lr.enabled = false;
+
+            lr.material.renderQueue = 3001;
+
+            segments[i] = new lineSegment { lr = lr };
         }
     }
 
@@ -99,16 +106,10 @@ public class PaperDetector : MonoBehaviour
             transformation = XRCpuImage.Transformation.MirrorY
         };
 
-        Debug.Log($"[UpdateTexture] CPU image = {img.width}x{img.height}, conversion output = {p.outputDimensions.x}x{p.outputDimensions.y}");
-
         if (camTex == null || camTex.width != img.width || camTex.height != img.height)
-        {
             camTex = new Texture2D(img.width, img.height, TextureFormat.RGBA32, false);
-            Debug.Log("[UpdateTexture] Created new Texture2D");
-        }
 
         using var buf = new NativeArray<byte>(img.GetConvertedDataSize(p), Allocator.Temp);
-        Debug.Log($"[UpdateTexture] buffer size = {buf.Length}");
         img.Convert(p, buf);
         camTex.LoadRawTextureData(buf);
         camTex.Apply();
@@ -117,78 +118,63 @@ public class PaperDetector : MonoBehaviour
         img.Dispose();
     }
 
-    /* -- project each corner, try AR raycast -- */
-    void PlaceCubes(Vector2[] imgCorners)
+    void PlaceLines(Vector2[] imgCorners)
     {
-        Debug.Log("[PlaceCubes] Starting placement pipeline");
-        var worldPos = new Vector3[4];
-        var usedFallback = new bool[4];
-        TrackableId? masterPlaneId = null;
+        // Prepare arrays
+        Vector3[] worldPos = new Vector3[4];
+        bool[] usedFallback = new bool[4];
+        TrackableId? masterPlane = null;
 
-        for (int i = 0; i < imgCorners.Length; i++)
+        // Raycast each corner
+        for (int i = 0; i < 4; i++)
         {
-            Debug.Log($"[PlaceCubes] imgCorner[{i}] = {imgCorners[i]}");
-            float vx = imgCorners[i].x / camTex.width;
-            float vy = imgCorners[i].y / camTex.height;
-            Debug.Log($"[PlaceCubes] normalized coords[{i}] = ({vx:F3},{vy:F3})");
+            var uv = new Vector2(imgCorners[i].x / camTex.width,
+                                 imgCorners[i].y / camTex.height);
+            var ray = Camera.main.ViewportPointToRay(uv);
+            Vector3 fallbackPos = ray.GetPoint(0.5f);
+            bool hitPlane = false;
+            Vector3 finalPos = fallbackPos;
 
-            // switch to ViewportPointToRay
-            var ray = Camera.main.ViewportPointToRay(new Vector3(vx, vy, 0));
-            Debug.Log($"[PlaceCubes] ray origin = {ray.origin}, dir = {ray.direction}");
-
-            bool didPlaneHit = false;
-            Vector3 hitPos = ray.GetPoint(0.5f);
-            Debug.Log($"[PlaceCubes] default fallback pos[{i}] = {hitPos}");
-
-            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon | TrackableType.FeaturePoint))
+            if (raycastManager.Raycast(ray, hits,
+                TrackableType.PlaneWithinPolygon | TrackableType.FeaturePoint))
             {
-                Debug.Log($"[PlaceCubes] raycast hits count = {hits.Count}");
-                ARRaycastHit chosenHit;
-                if (masterPlaneId.HasValue)
-                {
-                    chosenHit = hits.FirstOrDefault(h => h.trackableId == masterPlaneId.Value);
-                    Debug.Log($"[PlaceCubes] chosenHit by masterPlaneId = {chosenHit.pose.position}");
-                }
+                // prefer same plane after the first hit
+                ARRaycastHit chosen;
+                var planeHit = hits.FirstOrDefault(h => masterPlane.HasValue && h.trackableId == masterPlane);
+                if (!planeHit.Equals(default(ARRaycastHit)))
+                    chosen = planeHit;
                 else
+                    chosen = hits[0];
+                if (!masterPlane.HasValue)
+                    masterPlane = chosen.trackableId;
+
+                if (chosen.trackableId == masterPlane)
                 {
-                    chosenHit = hits[0];
-                    masterPlaneId = chosenHit.trackableId;
-                    Debug.Log($"[PlaceCubes] initial masterPlaneId = {masterPlaneId}");
-                }
-
-                if (chosenHit.trackableId == masterPlaneId)
-                {
-                    hitPos = chosenHit.pose.position;
-                    didPlaneHit = true;
-                    Debug.Log($"[PlaceCubes] plane hitPos[{i}] = {hitPos}");
+                    var arPlane = arPlaneManager.GetPlane(chosen.trackableId);
+                    Vector3 normal = arPlane.transform.up;            // plane’s normal
+                    finalPos = chosen.pose.position + normal * 0.1f;  
+                    hitPlane = true;
                 }
             }
 
-            if (!didPlaneHit)
-            {
-                hitPos = ray.GetPoint(0.5f);
-                usedFallback[i] = true;
-                Debug.Log($"[PlaceCubes] fallback for index {i}, pos = {hitPos}");
-            }
-            else
-            {
-                usedFallback[i] = false;
-            }
-
-            worldPos[i] = hitPos;
+            worldPos[i] = finalPos;
+            usedFallback[i] = !hitPlane;
         }
 
-        for (int i = 0; i < cubes.Length; i++)
+        // Draw 4 border segments
+        for (int i = 0; i < 4; i++)
         {
-            var cube = cubes[i];
-            cube.transform.position = worldPos[i];
-            cube.SetActive(true);
-            Debug.Log($"[PlaceCubes] placing cube[{i}] at {worldPos[i]}, fallback = {usedFallback[i]}");
+            var seg = segments[i];
+            // determine next index (wrap around)
+            int j = (i + 1) % 4;
+            seg.lr.enabled = true;
+            seg.lr.SetPosition(0, worldPos[i]);
+            seg.lr.SetPosition(1, worldPos[j]);
 
-            var rend = cube.GetComponentInChildren<Renderer>();
-            rend.material.color = usedFallback[i] ? fallbackColor : lockedColor;
+            // color = blue if both ends hit plane; else yellow
+            bool anyFallback = usedFallback[i] || usedFallback[j];
+            Color c = anyFallback ? Color.yellow : Color.blue;
+            seg.lr.startColor = seg.lr.endColor = c;
         }
-
-        Debug.Log($"[PlaceCubes] Completed. MasterPlaneId = {masterPlaneId}, any fallback = {usedFallback.Any(b => b)}");
     }
 }
