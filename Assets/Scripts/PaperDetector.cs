@@ -6,6 +6,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(ARCameraManager))]
 public class PaperDetector : MonoBehaviour
@@ -16,6 +17,9 @@ public class PaperDetector : MonoBehaviour
     [SerializeField] GameObject cubePrefab;
     [SerializeField] Transform cubesParent;
     [SerializeField] ARPlaneManager arPlaneManager;
+
+
+    [SerializeField] RawImage debugImage;
 
     /* ---------- internals ---------- */
     Texture2D camTex;
@@ -108,6 +112,8 @@ public class PaperDetector : MonoBehaviour
         img.Convert(p, buf);
         camTex.LoadRawTextureData(buf);
         camTex.Apply();
+
+        debugImage.texture = camTex;
         img.Dispose();
     }
 
