@@ -57,13 +57,9 @@ public class PaperDetectorDebug : MonoBehaviour
     /* Quick heuristic ordering: left-most two = top row, sort by Y */
     private Vector2[] OrderCorners(Vector2[] c)
     {
-        // sort by Y ascending
-        Array.Sort(c, (a, b) => a.y.CompareTo(b.y));
-        // first two are top row → sort those by X
-        if (c[0].x > c[1].x) (c[0], c[1]) = (c[1], c[0]);
-        // last two are bottom row → sort by X
-        if (c[2].x < c[3].x) (c[2], c[3]) = (c[3], c[2]);
-        return c;
+        Vector2 center = c.Aggregate(Vector2.zero, (a, b) => a + b) / 4f;
+        var sorted = c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
+        return sorted;
     }
 
     /* ================================================================= */
@@ -87,11 +83,18 @@ public class PaperDetectorDebug : MonoBehaviour
             inputRect = new RectInt(0, 0, img.width, img.height),
             outputDimensions = new Vector2Int(img.width, img.height),
             outputFormat = TextureFormat.RGBA32,
-            transformation = XRCpuImage.Transformation.MirrorY
+
+            
+            transformation =
+                 XRCpuImage.Transformation.MirrorY
         };
 
-        if (camTex == null || camTex.width != img.width || camTex.height != img.height)
+        if (camTex == null
+         || camTex.width != img.width
+         || camTex.height != img.height)
+        {
             camTex = new Texture2D(img.width, img.height, TextureFormat.RGBA32, false);
+        }
 
         using var buf = new NativeArray<byte>(img.GetConvertedDataSize(p), Allocator.Temp);
         img.Convert(p, buf);
@@ -99,6 +102,7 @@ public class PaperDetectorDebug : MonoBehaviour
         camTex.Apply();
         img.Dispose();
     }
+
 
     /* -- project each corner, try AR raycast -- */
     void PlaceCubes(Vector2[] imgCorners)
@@ -110,32 +114,28 @@ public class PaperDetectorDebug : MonoBehaviour
         // the one "master" plane we discovered on corner 0
         TrackableId? masterPlaneId = null;
 
-        for (int i = 0; i < imgCorners.Length; i++)
-        {
-            Vector2 scr = ImageToScreen(imgCorners[i]);
-            bool didPlaneHit = false;
-            Vector3 hitPos = Vector3.zero;
+        for(int i = 0; i < imgCorners.Length; i++)
+{
+            float vx = imgCorners[i].x / camTex.width;
+            float vy = imgCorners[i].y / camTex.height;
+            var ray = Camera.main.ViewportPointToRay(new Vector3(vx, vy, 0));
 
-            // cast against AR planes only (within the polygon boundary)
-            if (raycastManager.Raycast(scr, hits, TrackableType.PlaneWithinPolygon))
+            bool didPlaneHit = false;
+            Vector3 hitPos = ray.GetPoint(0.5f); // default fallback
+
+            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
             {
                 ARRaycastHit chosenHit = default;
-
                 if (masterPlaneId.HasValue)
                 {
-                    // try to find a hit on our same first plane
-                    var samePlaneHits = hits.Where(h => h.trackableId == masterPlaneId.Value);
-                    if (samePlaneHits.Any())
-                        chosenHit = samePlaneHits.First();
+                    chosenHit = hits.FirstOrDefault(h => h.trackableId == masterPlaneId.Value);
                 }
                 else
                 {
-                    // first corner: grab whatever plane came back
                     chosenHit = hits[0];
                     masterPlaneId = chosenHit.trackableId;
                 }
 
-                // if we have a valid hit on our one plane, lock to it
                 if (chosenHit.trackableId == masterPlaneId)
                 {
                     hitPos = chosenHit.pose.position;
@@ -143,10 +143,10 @@ public class PaperDetectorDebug : MonoBehaviour
                 }
             }
 
-            // fallback if we never got a consistent plane hit
+            // **fixed** fallback
             if (!didPlaneHit)
             {
-                hitPos = Camera.main.ScreenPointToRay(scr).GetPoint(0.5f);
+                hitPos = ray.GetPoint(0.5f);
                 usedFallback[i] = true;
             }
             else
@@ -171,10 +171,5 @@ public class PaperDetectorDebug : MonoBehaviour
 
     /* ---------- conversions ---------- */
 
-    Vector2 ImageToScreen(Vector2 img)
-        {
-            float nx = img.x / camTex.width;
-            float ny = 1f - (img.y / camTex.height);     // flip Y
-            return new Vector2(nx * Screen.width, ny * Screen.height);
-        }
+    
 }
