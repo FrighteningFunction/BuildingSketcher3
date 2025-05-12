@@ -1,4 +1,4 @@
-﻿// PaperDetectorDebug.cs
+﻿// PaperDetector.cs
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
 [RequireComponent(typeof(ARCameraManager))]
-public class PaperDetectorDebug : MonoBehaviour
+public class PaperDetector : MonoBehaviour
 {
     /* ---------- Inspector refs ---------- */
     [SerializeField] ARCameraManager cameraManager;
