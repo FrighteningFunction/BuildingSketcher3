@@ -168,12 +168,12 @@ public class PaperDetector : MonoBehaviour
             {
                 var chosen = hits[0];
                 var plane = arPlaneManager.GetPlane(chosen.trackableId);
-                hitPt = chosen.pose.position + plane.transform.up * 0.1f;
+                hitPt = chosen.pose.position + plane.transform.up * 0.01f;
                 hitPlane = true;
             }
             else
             {
-                hitPt = ray.GetPoint(0.5f);
+                hitPt = ray.GetPoint(1.0f);
             }
 
             worldPos[i] = Vector3.Lerp(prevPos[i], hitPt, 0.25f);
