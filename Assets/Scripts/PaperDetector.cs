@@ -33,7 +33,11 @@ public class PaperDetector : MonoBehaviour
         public bool end1Fallback;
     }
 
-    void Awake() => InitLines();
+    void Awake() { 
+        InitLines();
+
+        arPlaneManager.planePrefab.active = false;
+    }
     void OnEnable() => cameraManager.frameReceived += OnFrame;
     void OnDisable() => cameraManager.frameReceived -= OnFrame;
 
@@ -63,8 +67,19 @@ public class PaperDetector : MonoBehaviour
         // 3) Order the corners (CW)
         Vector2[] ordered = OrderCorners(imgCorners);
 
+        //convert each to viewport coordinates 
+        Vector2[] viewportCorners = new Vector2[ordered.Length];
+        for (int i = 0; i < ordered.Length; i++)
+        {
+            viewportCorners[i] = ImagePointToViewport(
+                ordered[i],
+                camTex.width,
+                camTex.height
+            );
+        }
+
         // 4) Project + raycast + draw
-        PlaceLines(ordered);
+        PlaceLinesFromViewport(viewportCorners);
     }
 
     /* Quick heuristic ordering: Sort by angle around center */
@@ -77,6 +92,39 @@ public class PaperDetector : MonoBehaviour
     /* ================================================================= */
     /*                            HELPERS                                */
     /* ================================================================= */
+
+    /// <summary>
+    /// Converts a pixel-space point (as returned by your OpenCV plugin on camTex)
+    /// into normalized Unity viewport coordinates, handling MirrorY and orientation.
+    /// </summary>
+    Vector2 ImagePointToViewport(Vector2 imgPt, int texWidth, int texHeight)
+    {
+        // 1) Normalize X to [0,1], invert Y to account for MirrorY
+        float x = imgPt.x / texWidth;
+        float y = 1f - (imgPt.y / texHeight);
+
+        // 2) Rotate around screen center (0.5,0.5) based on orientation
+        float dx = x - 0.5f;
+        float dy = y - 0.5f;
+        switch (Screen.orientation)
+        {
+            case ScreenOrientation.Portrait:
+                x = 0.5f - dy;
+                y = 0.5f + dx;
+                break;
+            case ScreenOrientation.PortraitUpsideDown:
+                x = 0.5f + dy;
+                y = 0.5f - dx;
+                break;
+            case ScreenOrientation.LandscapeRight:
+                x = 0.5f + dy;
+                y = 0.5f + dx;
+                break;
+                // LandscapeLeft: no change
+        }
+
+        return new Vector2(x, y);
+    }
     void InitLines()
     {
         for (int i = 0; i < 4; ++i)
@@ -118,41 +166,29 @@ public class PaperDetector : MonoBehaviour
         img.Dispose();
     }
 
-    void PlaceLines(Vector2[] imgCorners)
+    void PlaceLinesFromViewport(Vector2[] vpCorners)
     {
-        // Prepare arrays
-        Vector3[] worldPos = new Vector3[4];
-        bool[] usedFallback = new bool[4];
+        Vector3[] worldPos = new Vector3[vpCorners.Length];
+        bool[] usedFallback = new bool[vpCorners.Length];
         TrackableId? masterPlane = null;
 
-        // Raycast each corner
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < vpCorners.Length; i++)
         {
-            var uv = new Vector2(imgCorners[i].x / camTex.width,
-                                 imgCorners[i].y / camTex.height);
-            var ray = Camera.main.ViewportPointToRay(uv);
-            Vector3 fallbackPos = ray.GetPoint(0.5f);
+            // directly use viewport coords to cast ray
+            var ray = Camera.main.ViewportPointToRay(new Vector3(vpCorners[i].x, vpCorners[i].y, 0));
+            Vector3 fallback = ray.GetPoint(0.5f);
             bool hitPlane = false;
-            Vector3 finalPos = fallbackPos;
+            Vector3 finalPos = fallback;
 
-            if (raycastManager.Raycast(ray, hits,
-                TrackableType.PlaneWithinPolygon | TrackableType.FeaturePoint))
+            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon | TrackableType.FeaturePoint))
             {
-                // prefer same plane after the first hit
-                ARRaycastHit chosen;
-                var planeHit = hits.FirstOrDefault(h => masterPlane.HasValue && h.trackableId == masterPlane);
-                if (!planeHit.Equals(default(ARRaycastHit)))
-                    chosen = planeHit;
-                else
-                    chosen = hits[0];
-                if (!masterPlane.HasValue)
-                    masterPlane = chosen.trackableId;
-
+                // pick your hit (same plane logic...)
+                var chosen = hits[0];
+                if (!masterPlane.HasValue) masterPlane = chosen.trackableId;
                 if (chosen.trackableId == masterPlane)
                 {
                     var arPlane = arPlaneManager.GetPlane(chosen.trackableId);
-                    Vector3 normal = arPlane.transform.up;            // plane’s normal
-                    finalPos = chosen.pose.position + normal * 0.1f;  
+                    finalPos = chosen.pose.position + arPlane.transform.up * 0.1f;
                     hitPlane = true;
                 }
             }
@@ -161,20 +197,16 @@ public class PaperDetector : MonoBehaviour
             usedFallback[i] = !hitPlane;
         }
 
-        // Draw 4 border segments
+        // draw exactly as before, looping i → i+1...
         for (int i = 0; i < 4; i++)
         {
-            var seg = segments[i];
-            // determine next index (wrap around)
             int j = (i + 1) % 4;
+            var seg = segments[i];
             seg.lr.enabled = true;
             seg.lr.SetPosition(0, worldPos[i]);
             seg.lr.SetPosition(1, worldPos[j]);
-
-            // color = blue if both ends hit plane; else yellow
             bool anyFallback = usedFallback[i] || usedFallback[j];
-            Color c = anyFallback ? Color.yellow : Color.blue;
-            seg.lr.startColor = seg.lr.endColor = c;
+            seg.lr.startColor = seg.lr.endColor = anyFallback ? Color.yellow : Color.blue;
         }
     }
 }
