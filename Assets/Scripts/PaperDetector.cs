@@ -1,149 +1,160 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿// PaperDetectorDebug.cs
+using System;
+using System.Linq;
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
-/// <summary>
-/// High-level controller that captures the camera frame, runs the native paper-corner
-/// detector, and spawns / moves four cubes at the detected corner positions.
-/// </summary>
-public class PaperDetector : MonoBehaviour
+[RequireComponent(typeof(ARCameraManager))]
+public class PaperDetectorDebug : MonoBehaviour
 {
-    /* ---------- 1. native-plugin import ---------- */
-    [DllImport("PaperPlugin1")]
-    private static extern bool FindPaperCorners(
-        byte[] imageData,
-        int width,
-        int height,
-        float[] outCorners);
-
-    /* ---------- 2. scene references ---------- */
+    /* ---------- Inspector refs ---------- */
     [SerializeField] ARCameraManager cameraManager;
-    [SerializeField] GameObject cornerPrefab;
-    [SerializeField] Transform cornersParent;
+    [SerializeField] ARRaycastManager raycastManager;
+    [SerializeField] GameObject cubePrefab;
+    [SerializeField] Transform cubesParent;
 
-    /* ---------- 3. runtime fields ---------- */
-    Texture2D cameraTexture;
-    GameObject[] cornerCubes = new GameObject[4];
+    /* ---------- internals ---------- */
+    Texture2D camTex;
+    readonly GameObject[] cubes = new GameObject[4];
+    static readonly List<ARRaycastHit> hits = new();
 
-    /* ---------- Unity lifecycle hooks ---------- */
-    void Awake() => InitializeCornerCubes();
-    void OnEnable() => cameraManager.frameReceived += OnCameraFrame;
-    void OnDisable() => cameraManager.frameReceived -= OnCameraFrame;
+    readonly Color lockedColor = Color.gray;
+    readonly Color fallbackColor = Color.yellow;
 
-    /* ============================================================= */
-    /* =========== Main per-frame callback, now bite-sized ========== */
-    /* ============================================================= */
+    void Awake() => InitCubes();
+    void OnEnable() => cameraManager.frameReceived += OnFrame;
+    void OnDisable() => cameraManager.frameReceived -= OnFrame;
 
-    /// <summary>
-    /// Master callback invoked every time ARFoundation provides a new camera frame.
-    /// </summary>
-    void OnCameraFrame(ARCameraFrameEventArgs args)
+    /* ================================================================= */
+    /*                               FRAME                               */
+    /* ================================================================= */
+    void OnFrame(ARCameraFrameEventArgs _)
     {
-        // 1) Acquire the CPU image
-        if (!TryGetCpuImage(out var cpuImage)) return;
+        if (!cameraManager.TryAcquireLatestCpuImage(out var cpu)) return;
 
-        // 2) Convert it to a Texture2D in RGBA32 format
-        ConvertCpuImageToTexture(cpuImage);
+        UpdateTexture(cpu);
+        byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
 
-        // 3) Extract managed byte[] for the plugin call
-        byte[] rgbaBytes = GetTextureBytes(cameraTexture);
+        if (!PaperPlugin.FindPaperCorners(
+                 rgba, camTex.width, camTex.height,
+                 out Vector2[] imgCorners))
+        {
+            Debug.Log("Plugin: paper NOT found.");
+            return;
+        }
 
-        // 4) Ask the native plugin for the paper corners
-        float[] corners = new float[8];
-        bool found = FindPaperCorners(
-            rgbaBytes, cameraTexture.width, cameraTexture.height, corners);
+        Debug.Log($"Plugin corners img px: {string.Join(" ", imgCorners.Select(v => $"[{v.x:F0},{v.y:F0}]"))}");
 
-        // 5) If detected, move / show the corner cubes
-        if (found) UpdateCornerCubes(corners);
+        // order them TL, TR, BR, BL for repeatable cube assignment
+        Vector2[] ordered = OrderCorners(imgCorners);
+        PlaceCubes(ordered);
     }
 
-    /* ============================================================= */
-    /* ======================  Helper methods  ===================== */
-    /* ============================================================= */
+    /* ================================================================= */
+    /*                            HELPERS                                */
+    /* ================================================================= */
 
-    // ───────────────────────────────────────────────────────────────
-    // Initializes four cubes (one for each corner) when the scene loads.
-    // ───────────────────────────────────────────────────────────────
-    void InitializeCornerCubes()
+    void InitCubes()
     {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; ++i)
         {
-            cornerCubes[i] = Instantiate(cornerPrefab, cornersParent);
-            cornerCubes[i].name = $"Corner_{i}";
-            cornerCubes[i].SetActive(false);         // hidden until first detection
+            cubes[i] = Instantiate(cubePrefab, cubesParent);
+            cubes[i].name = $"Cube_{i}";
+            cubes[i].SetActive(false);
         }
     }
 
-    // ───────────────────────────────────────────────────────────────
-    // Attempts to get the most recent XRCpuImage. Returns true if successful.
-    // Automatically disposes the image if conversion fails later on.
-    // ───────────────────────────────────────────────────────────────
-    bool TryGetCpuImage(out XRCpuImage image) =>
-        cameraManager.TryAcquireLatestCpuImage(out image);
-
-    // ───────────────────────────────────────────────────────────────
-    // Converts the acquired CPU image into an RGBA32 Texture2D,
-    // re-using an existing Texture2D if the resolution hasn’t changed.
-    // ───────────────────────────────────────────────────────────────
-    void ConvertCpuImageToTexture(XRCpuImage image)
+    void UpdateTexture(XRCpuImage img)
     {
-        var conv = new XRCpuImage.ConversionParams
+        var p = new XRCpuImage.ConversionParams
         {
-            inputRect = new RectInt(0, 0, image.width, image.height),
-            outputDimensions = new Vector2Int(image.width, image.height),
+            inputRect = new RectInt(0, 0, img.width, img.height),
+            outputDimensions = new Vector2Int(img.width, img.height),
             outputFormat = TextureFormat.RGBA32,
             transformation = XRCpuImage.Transformation.MirrorY
         };
 
-        // Ensure we have a Texture2D of correct size/format
-        if (cameraTexture == null ||
-            cameraTexture.width != image.width ||
-            cameraTexture.height != image.height)
-        {
-            cameraTexture = new Texture2D(image.width, image.height,
-                                          TextureFormat.RGBA32, false);
-        }
+        if (camTex == null || camTex.width != img.width || camTex.height != img.height)
+            camTex = new Texture2D(img.width, img.height, TextureFormat.RGBA32, false);
 
-        // Allocate a temporary buffer and perform the conversion
-        int byteCount = image.GetConvertedDataSize(conv);
-        using (var buffer = new NativeArray<byte>(byteCount, Allocator.Temp))
-        {
-            image.Convert(conv, buffer);
-            cameraTexture.LoadRawTextureData(buffer);
-            cameraTexture.Apply();
-        }
-
-        image.Dispose();   // always dispose the XRCpuImage
+        using var buf = new NativeArray<byte>(img.GetConvertedDataSize(p), Allocator.Temp);
+        img.Convert(p, buf);
+        camTex.LoadRawTextureData(buf);
+        camTex.Apply();
+        img.Dispose();
     }
 
-    // ───────────────────────────────────────────────────────────────
-    // Returns the Texture2D pixel data as a managed byte[] so it can
-    // be passed to the unmanaged plugin (P/Invoke requires managed memory).
-    // ───────────────────────────────────────────────────────────────
-    static byte[] GetTextureBytes(Texture2D tex) =>
-        tex.GetRawTextureData<byte>().ToArray();
-
-    // ───────────────────────────────────────────────────────────────
-    // Converts the 4 screen-space corner coordinates returned by the plugin
-    // into 3D world positions and places the cubes there.
-    // ───────────────────────────────────────────────────────────────
-    void UpdateCornerCubes(float[] corners)
+    /* -- project each corner, try AR raycast -- */
+    void PlaceCubes(Vector2[] imgCorners)
     {
-        for (int i = 0; i < 4; i++)
+        bool allHitSamePlane = true;
+        TrackableId? firstPlane = null;
+
+        Vector3[] worldPos = new Vector3[4];
+        bool[] usedFallback = new bool[4];
+
+        for (int i = 0; i < 4; ++i)
         {
-            Vector2 screen = new(
-                corners[i * 2 + 0],
-                corners[i * 2 + 1]);
+            Vector2 scr = ImageToScreen(imgCorners[i]);
 
-            // Ray-cast 0.5 m forward from the camera through that pixel
-            var ray = Camera.main.ScreenPointToRay(screen);
-            Vector3 pos = ray.GetPoint(0.5f);
+            if (raycastManager.Raycast(scr, hits, TrackableType.Planes | TrackableType.PlaneWithinPolygon
+                                                                          | TrackableType.FeaturePoint
+                                                                          | TrackableType.Depth))
+            {
+                var hit = hits[0];
+                worldPos[i] = hit.pose.position;
+                usedFallback[i] = false;
 
-            cornerCubes[i].transform.position = pos;
-            cornerCubes[i].SetActive(true);
+                if (firstPlane == null) firstPlane = hit.trackableId;
+                else if (firstPlane != hit.trackableId) allHitSamePlane = false;
+
+                Debug.Log($"Ray[{i}] plane hit @ {worldPos[i]}  dist={hit.distance:F2}");
+            }
+            else
+            {
+                worldPos[i] = Camera.main.ScreenPointToRay(scr).GetPoint(0.5f);
+                usedFallback[i] = true;
+                allHitSamePlane = false;          // by definition
+                Debug.Log($"Ray[{i}] fallback 0.5m  pos={worldPos[i]}");
+            }
         }
+
+        // move / color cubes
+        for (int i = 0; i < 4; ++i)
+        {
+            cubes[i].transform.position = worldPos[i];
+            cubes[i].SetActive(true);
+
+            var rend = cubes[i].GetComponentInChildren<Renderer>();
+            rend.material.color = usedFallback[i] ? fallbackColor : lockedColor;
+        }
+
+        Debug.Log(allHitSamePlane
+            ? "All corners anchored on same plane."
+            : "At least one corner used fallback depth or different plane.");
+    }
+
+    /* ---------- conversions ---------- */
+
+    Vector2 ImageToScreen(Vector2 img)
+    {
+        float nx = img.x / camTex.width;
+        float ny = 1f - (img.y / camTex.height);     // flip Y
+        return new Vector2(nx * Screen.width, ny * Screen.height);
+    }
+
+    /* Quick heuristic ordering: left-most two = top row, sort by Y */
+    static Vector2[] OrderCorners(Vector2[] c)
+    {
+        // sort by Y ascending
+        Array.Sort(c, (a, b) => a.y.CompareTo(b.y));
+        // first two are top row → sort those by X
+        if (c[0].x > c[1].x) (c[0], c[1]) = (c[1], c[0]);
+        // last two are bottom row → sort by X
+        if (c[2].x < c[3].x) (c[2], c[3]) = (c[3], c[2]);
+        return c;
     }
 }
