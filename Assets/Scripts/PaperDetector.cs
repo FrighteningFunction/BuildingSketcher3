@@ -101,10 +101,10 @@ public class PaperDetector : MonoBehaviour
         Vector4 uv = new Vector4(u, v, 1f, 0f);
         Vector4 mapped = displayMatrix.transpose * uv;
 
-        if (mapped.z != 0f)                                   // <-- projective divide
+        if (mapped.w != 0f)                                   // <-- projective divide
         {
-            mapped.x /= mapped.z;
-            mapped.y /= mapped.z;
+            mapped.x /= mapped.w;
+            mapped.y /= mapped.w;
         }
 
         return new Vector2(mapped.x, mapped.y);
@@ -174,7 +174,7 @@ public class PaperDetector : MonoBehaviour
             {
                 var chosen = hits[0];
                 var plane = arPlaneManager.GetPlane(chosen.trackableId);
-                hitPt = chosen.pose.position + plane.transform.up * 0.01f;
+                hitPt = chosen.pose.position;
                 hitPlane = true;
             }
             else
