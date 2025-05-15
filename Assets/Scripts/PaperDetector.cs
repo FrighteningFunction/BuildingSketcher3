@@ -48,12 +48,13 @@ public class PaperDetector : MonoBehaviour
     void OnFrame(ARCameraFrameEventArgs args)
     {
 
+        Debug.Log("--------------------------------NEW FRAME---------------------------------\n"+
+                  "--------------------------------------------------------------------------");
+
         if (!cameraManager.TryAcquireLatestCpuImage(out var cpu))
             return;
 
-        UpdateTexture(cpu);
-
-        
+        UpdateTexture(cpu);        
 
         byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
         if (!PaperPlugin.FindPaperCorners(rgba, camTex.width, camTex.height, out Vector2[] imgCorners))
@@ -79,21 +80,9 @@ public class PaperDetector : MonoBehaviour
         // 2) convert each raw image‐space corner → normalized UV → into the same UV space
         Vector2[] viewportCorners = new Vector2[imgCorners.Length];
         for(int i = 0; i < imgCorners.Length; i++)
-        {
-            float u = imgCorners[i].x / camTex.width;
-            float v = 1f - (imgCorners[i].y / camTex.height);   // ✱ flip Y so (0,0) = top-left
+        { 
 
-            Vector4 raw = new Vector4(u, v, 0f, 1f);            // w = 0, z = 1  (Unity docs)
-            Vector4 mapped = displayMatrix * raw;
-
-            // safety: homogeneous divide
-            if (mapped.w != 0f)
-            {
-                mapped.x /= mapped.w;
-                mapped.y /= mapped.w;
-            }
-
-            viewportCorners[i] = new Vector2(mapped.x, mapped.y);
+            viewportCorners[i] = fromRawCpuToViewport(displayMatrix, imgCorners[i]);
         }
 
 
@@ -102,6 +91,24 @@ public class PaperDetector : MonoBehaviour
         for (int i = 0; i < viewportCorners.Length; ++i)
             Debug.Log($"vp[{i}] = {viewportCorners[i]}");   // should stay between 0-1
         PlaceLinesFromViewport(ordered);
+    }
+
+    private Vector2 fromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cord)
+    {
+        float u = cord.x / camTex.width;
+        float v = cord.y / camTex.height;
+
+        Vector4 uv = new Vector4(u, v, 1f, 0f);
+        Vector4 mapped = displayMatrix.transpose * uv;
+
+        // safety: homogeneous divide
+        //if (mapped.w != 0f)
+        //{
+        //    mapped.x /= mapped.w;
+        //    mapped.y /= mapped.w;
+        //}
+
+        return new Vector2(mapped.x, mapped.y);
     }
 
     Vector2[] OrderCorners(Vector2[] c)
@@ -180,7 +187,7 @@ public class PaperDetector : MonoBehaviour
             prevPos[i] = worldPos[i];
             usedFallback[i] = !hitPlane;
 
-            Debug.Log($" Corner[{i}] → World: {worldPos[i]:F2} {(hitPlane ? "YES" : "NO")}");
+            Debug.Log($" Corner[{i}] to World: {worldPos[i]:F2} {(hitPlane ? "YES" : "NO")}");
         }
 
         for (int i = 0; i < 4; i++)
@@ -195,7 +202,7 @@ public class PaperDetector : MonoBehaviour
             Color col = anyFallback ? Color.yellow : Color.blue;
             seg.lr.startColor = seg.lr.endColor = col;
 
-            Debug.Log($"Segment[{i}] From {worldPos[i]:F2} → {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
+            Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
         }
     }
 }
