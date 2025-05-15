@@ -135,6 +135,9 @@
       <AdditionalLibraryDirectories>C:\libs\opencv\build\x64\vc16\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world4110d.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Message>xcopy /Y "$(TargetDir)PaperPlugin1.dll" "$(SolutionDir)PaperPluginTester\$(Configuration)\"</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -157,6 +160,9 @@
       <AdditionalLibraryDirectories>C:\libs\opencv\build\x64\vc16\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_world4110.lib;opencv_world4110d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Message>xcopy /Y "$(TargetDir)PaperPlugin1.dll" "$(SolutionDir)PaperPluginTester\$(Configuration)\"</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
