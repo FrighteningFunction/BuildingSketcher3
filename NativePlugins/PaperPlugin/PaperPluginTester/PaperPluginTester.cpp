@@ -40,11 +40,11 @@ int main() {
         std::cerr << "Failed to open image file: " << imagePath << std::endl;
         return 1;
     }
-    size_t dataSize = (size_t)width * height * channels;
+    size_t dataSize = static_cast<size_t>(width) * height * channels;
     unsigned char* buffer = new unsigned char[dataSize];
     file.read(reinterpret_cast<char*>(buffer), dataSize);
     file.close();
-    if (file.gcount() != (std::streamsize)dataSize) {
+    if (file.gcount() != static_cast<std::streamsize>(dataSize)) {
         std::cerr << "Failed to read full image data." << std::endl;
         delete[] buffer;
         return 1;
@@ -88,6 +88,26 @@ int main() {
     outFile.write(reinterpret_cast<char*>(buffer), dataSize);
     outFile.close();
     std::cout << "Wrote annotated image to: " << outPath << std::endl;
+
+    // Write image dimensions to a .txt file with the same base name
+    std::string txtPath = outPath;
+    auto pos = txtPath.rfind('.');
+    if (pos != std::string::npos) {
+        txtPath = txtPath.substr(0, pos) + ".txt";
+    }
+    else {
+        txtPath += ".txt";
+    }
+
+    std::ofstream txtFile(txtPath);
+    if (!txtFile) {
+        std::cerr << "Failed to open dimension file: " << txtPath << std::endl;
+    }
+    else {
+        txtFile << "height: " << height << ", width: " << width;
+        txtFile.close();
+        std::cout << "Wrote image dimensions to: " << txtPath << std::endl;
+    }
 
     delete[] buffer;
     return 0;

@@ -6,24 +6,38 @@ SRC_DIR = os.path.join("PaperPlugin", "PaperPluginTester")
 DST_DIR = os.path.join("AnnotatedTestImages")
 os.makedirs(DST_DIR, exist_ok=True)
 
-def read_rgba_image(filepath):
+def get_dimensions_from_txt(txt_path):
+    try:
+        with open(txt_path, "r") as f:
+            line = f.read().strip()
+            parts = line.replace(" ", "").split(",")
+            height = int(parts[0].split(":")[1])
+            width = int(parts[1].split(":")[1])
+            return height, width
+    except Exception as e:
+        print(f"Could not read dimensions from {txt_path}: {e}")
+        return None, None
+
+def read_rgba_image(filepath, height, width):
     with open(filepath, "rb") as f:
         data = f.read()
     arr = np.frombuffer(data, dtype=np.uint8)
-    total_pixels = arr.size // 4
-    # Try to guess square image dimensions
-    side = int(total_pixels ** 0.5)
-    if side * side * 4 != arr.size:
-        print(f"Skipping {filepath}: cannot infer square dimensions from size {arr.size}")
+    expected_size = height * width * 4
+    if arr.size != expected_size:
+        print(f"Skipping {filepath}: size {arr.size} does not match expected {expected_size}")
         return None
-    arr = arr.reshape((side, side, 4))
+    arr = arr.reshape((height, width, 4))
     return arr
 
 for root, _, files in os.walk(SRC_DIR):
     for file in files:
         if file.startswith("_testimage") and file.endswith(".rgba"):
             rgba_path = os.path.join(root, file)
-            rgba_data = read_rgba_image(rgba_path)
+            txt_path = os.path.splitext(rgba_path)[0] + ".txt"
+            height, width = get_dimensions_from_txt(txt_path)
+            if not height or not width:
+                continue
+            rgba_data = read_rgba_image(rgba_path, height, width)
             if rgba_data is None:
                 continue
             img = Image.fromarray(rgba_data, "RGBA")
