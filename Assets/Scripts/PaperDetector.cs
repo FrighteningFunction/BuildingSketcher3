@@ -37,19 +37,23 @@ public class PaperDetector : MonoBehaviour
     void Awake()
     {
         InitLines();
-        arPlaneManager.planePrefab.active = false;
+        arPlaneManager.planePrefab.active = true;
+        lineMaterial.renderQueue = 3100;
         Debug.Log("PaperDetector initialized.");
     }
 
     void OnEnable() => cameraManager.frameReceived += OnFrame;
     void OnDisable() => cameraManager.frameReceived -= OnFrame;
 
-    void OnFrame(ARCameraFrameEventArgs _)
+    void OnFrame(ARCameraFrameEventArgs args)
     {
+
         if (!cameraManager.TryAcquireLatestCpuImage(out var cpu))
             return;
 
         UpdateTexture(cpu);
+
+        
 
         byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
         if (!PaperPlugin.FindPaperCorners(rgba, camTex.width, camTex.height, out Vector2[] imgCorners))
@@ -61,53 +65,49 @@ public class PaperDetector : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Detected {imgCorners.Length} corners.");
-        for (int i = 0; i < imgCorners.Length; i++)
-            Debug.Log($"    Corner[{i}] = {imgCorners[i]}");
-
-        Vector2[] ordered = OrderCorners(imgCorners);
-
-        Vector2[] viewportCorners = new Vector2[ordered.Length];
-        for (int i = 0; i < ordered.Length; i++)
+        Matrix4x4 displayMatrix;
+        if (!args.displayMatrix.HasValue)
         {
-            viewportCorners[i] = ImagePointToViewport(ordered[i], camTex.width, camTex.height);
-            Debug.Log($"    Ordered → Viewport[{i}] = {viewportCorners[i]:F3}");
+            Debug.LogWarning(" No display matrix available.");
+            return;
+        }
+        else
+        {
+            displayMatrix = args.displayMatrix.Value;
         }
 
-        PlaceLinesFromViewport(viewportCorners);
+        // 2) convert each raw image‐space corner → normalized UV → into the same UV space
+        Vector2[] viewportCorners = new Vector2[imgCorners.Length];
+        for(int i = 0; i < imgCorners.Length; i++)
+        {
+            float u = imgCorners[i].x / camTex.width;
+            float v = 1f - (imgCorners[i].y / camTex.height);   // ✱ flip Y so (0,0) = top-left
+
+            Vector4 raw = new Vector4(u, v, 0f, 1f);            // w = 0, z = 1  (Unity docs)
+            Vector4 mapped = displayMatrix * raw;
+
+            // safety: homogeneous divide
+            if (mapped.w != 0f)
+            {
+                mapped.x /= mapped.w;
+                mapped.y /= mapped.w;
+            }
+
+            viewportCorners[i] = new Vector2(mapped.x, mapped.y);
+        }
+
+
+        Vector2[] ordered = OrderCorners(viewportCorners);
+
+        for (int i = 0; i < viewportCorners.Length; ++i)
+            Debug.Log($"vp[{i}] = {viewportCorners[i]}");   // should stay between 0-1
+        PlaceLinesFromViewport(ordered);
     }
 
     Vector2[] OrderCorners(Vector2[] c)
     {
         Vector2 center = c.Aggregate(Vector2.zero, (a, b) => a + b) / 4f;
         return c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
-    }
-
-    Vector2 ImagePointToViewport(Vector2 imgPt, int texWidth, int texHeight)
-    {
-        float x = imgPt.x / texWidth;
-        float y = 1f - (imgPt.y / texHeight);
-
-        float dx = x - 0.5f;
-        float dy = y - 0.5f;
-
-        switch (Screen.orientation)
-        {
-            case ScreenOrientation.Portrait:
-                x = 0.5f - dy;
-                y = 0.5f + dx;
-                break;
-            case ScreenOrientation.PortraitUpsideDown:
-                x = 0.5f + dy;
-                y = 0.5f - dx;
-                break;
-            case ScreenOrientation.LandscapeRight:
-                x = 0.5f + dy;
-                y = 0.5f + dx;
-                break;
-        }
-
-        return new Vector2(x, y);
     }
 
     void InitLines()
@@ -133,8 +133,8 @@ public class PaperDetector : MonoBehaviour
         {
             inputRect = new RectInt(0, 0, img.width, img.height),
             outputDimensions = new Vector2Int(img.width, img.height),
-            outputFormat = TextureFormat.RGBA32,
-            transformation = XRCpuImage.Transformation.MirrorY | XRCpuImage.Transformation.MirrorX
+            outputFormat = TextureFormat.RGBA32
+            
         };
 
         if (camTex == null || camTex.width != img.width || camTex.height != img.height)
@@ -176,7 +176,7 @@ public class PaperDetector : MonoBehaviour
                 hitPt = ray.GetPoint(1.0f);
             }
 
-            worldPos[i] = Vector3.Lerp(prevPos[i], hitPt, 0.25f);
+            worldPos[i] = hitPt;
             prevPos[i] = worldPos[i];
             usedFallback[i] = !hitPlane;
 
