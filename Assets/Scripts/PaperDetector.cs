@@ -172,7 +172,7 @@ public class PaperDetector : MonoBehaviour
             Vector3 hitPt;
             bool hitPlane = false;
 
-            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon | TrackableType.FeaturePoint))
+            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
             {
                 var chosen = hits[0];
                 var plane = arPlaneManager.GetPlane(chosen.trackableId);
