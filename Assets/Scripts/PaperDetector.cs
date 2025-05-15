@@ -101,12 +101,11 @@ public class PaperDetector : MonoBehaviour
         Vector4 uv = new Vector4(u, v, 1f, 0f);
         Vector4 mapped = displayMatrix.transpose * uv;
 
-        // safety: homogeneous divide
-        //if (mapped.w != 0f)
-        //{
-        //    mapped.x /= mapped.w;
-        //    mapped.y /= mapped.w;
-        //}
+        if (mapped.z != 0f)                                   // <-- projective divide
+        {
+            mapped.x /= mapped.z;
+            mapped.y /= mapped.z;
+        }
 
         return new Vector2(mapped.x, mapped.y);
     }
