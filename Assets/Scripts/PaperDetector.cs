@@ -101,11 +101,13 @@ public class PaperDetector : MonoBehaviour
         Vector4 uv = new Vector4(u, v, 1f, 0f);
         Vector4 mapped = displayMatrix.transpose * uv;
 
-        if (mapped.w != 0f)                                   // <-- projective divide
-        {
-            mapped.x /= mapped.w;
-            mapped.y /= mapped.w;
-        }
+        //if (mapped.w != 0f)                                   // <-- projective divide
+        //{
+        //    mapped.x /= mapped.w;
+        //    mapped.y /= mapped.w;
+        //}
+
+        Debug.Log($"mapped = {mapped}");
 
         return new Vector2(mapped.x, mapped.y);
     }
