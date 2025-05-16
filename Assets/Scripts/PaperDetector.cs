@@ -25,7 +25,8 @@ public class PaperDetector : MonoBehaviour
     Texture2D camTex;
     lineSegment[] segments = new lineSegment[4];
     static readonly List<ARRaycastHit> hits = new();
-    Vector3[] prevPos = new Vector3[4];
+
+
 
     struct lineSegment
     {
@@ -185,7 +186,7 @@ public class PaperDetector : MonoBehaviour
             }
 
             worldPos[i] = hitPt;
-            prevPos[i] = worldPos[i];
+            
             usedFallback[i] = !hitPlane;
 
             Debug.Log($" Corner[{i}] to World: {worldPos[i]:F2} {(hitPlane ? "YES" : "NO")}");
