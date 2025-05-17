@@ -105,19 +105,27 @@ public class PaperDetector : MonoBehaviour
         //pipelineDebugger.SetupPrinted();
     }
 
-    public Vector2 fromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cord)
+    public Vector2 fromRawCpuToViewport(Matrix4x4 D, Vector2 cord)
     {
         float u = cord.x / camTex.width;
         float v = cord.y / camTex.height;
 
         Vector4 uv = new Vector4(u, v, 1f, 0f);
-        Vector4 mapped = displayMatrix.transpose * uv;
+        Vector4 mapped = D.transpose * uv;
 
         //if (mapped.w != 0f)                                   // <-- projective divide
         //{
         //    mapped.x /= mapped.w;
         //    mapped.y /= mapped.w;
         //}
+
+        //remove cropping
+        float topCrop = 1f - D[2, 1];
+        Debug.Log($"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!topCrop = {topCrop}");
+        float scaleY = 1f / (1f - 2f*topCrop);
+
+        mapped.y = (mapped.y - topCrop) * scaleY;
+
 
         Debug.Log($"mapped = {mapped}");
 
