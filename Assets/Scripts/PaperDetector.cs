@@ -100,6 +100,8 @@ public class PaperDetector : MonoBehaviour
 
         pipelineDebugger.logTransormedCorners(displayMatrix, new Vector2(camTex.width, camTex.height), fromRawCpuToViewport);
 
+        pipelineDebugger.printDisplayMatrix(displayMatrix);
+
         //pipelineDebugger.SetupPrinted();
     }
 

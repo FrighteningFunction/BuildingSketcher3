@@ -51,4 +51,13 @@ public class PipelineDebugger : MonoBehaviour
         }
 
     }
+
+    public void printDisplayMatrix(Matrix4x4 D)
+    {
+        if (!printed)
+        {
+            Debug.Log("Display matrix transposed: \n" + D.transpose);
+            Debug.Log("Display matrix normal: \n" + D);
+        }
+    }
 }
