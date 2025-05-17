@@ -1133,6 +1133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1860563522}
   - component: {fileID: 1860563523}
+  - component: {fileID: 1860563528}
   - component: {fileID: 1860563524}
   - component: {fileID: 1860563526}
   - component: {fileID: 1860563525}
@@ -1175,6 +1176,7 @@ MonoBehaviour:
   raycastManager: {fileID: 608830363}
   arPlaneManager: {fileID: 151853166}
   debugImage: {fileID: 1402336279}
+  pipelineDebugger: {fileID: 1860563528}
   lineMaterial: {fileID: 2100000, guid: 24f060dd05c02374c9d1d97b8410968d, type: 2}
   lineWidth: 0.005
 --- !u!114 &1860563524
@@ -1304,6 +1306,18 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &1860563528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860563521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6037c52bfa4d6774082c0a2e5a87fcf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &2001374502 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6402244310720262706, guid: 48cb3fb68c91eb94999fd99957eb0cae,

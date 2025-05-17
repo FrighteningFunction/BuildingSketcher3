@@ -16,15 +16,16 @@ public class PaperDetector : MonoBehaviour
     [SerializeField] ARRaycastManager raycastManager;
     [SerializeField] ARPlaneManager arPlaneManager;
     [SerializeField] RawImage debugImage;
+    [SerializeField] PipelineDebugger pipelineDebugger;
 
     [Header("Line Settings")]
     [SerializeField] Material lineMaterial;
     [SerializeField] float lineWidth = 0.005f;
 
     /* ---------- internals ---------- */
-    Texture2D camTex;
-    lineSegment[] segments = new lineSegment[4];
-    static readonly List<ARRaycastHit> hits = new();
+    private Texture2D camTex;
+    private lineSegment[] segments = new lineSegment[4];
+    private static readonly List<ARRaycastHit> hits = new();
 
 
 
@@ -92,9 +93,17 @@ public class PaperDetector : MonoBehaviour
         for (int i = 0; i < viewportCorners.Length; ++i)
             Debug.Log($"vp[{i}] = {viewportCorners[i]}");   // should stay between 0-1
         PlaceLinesFromViewport(ordered);
+
+        //Debugging
+
+        pipelineDebugger.printConverterCornersDebug(displayMatrix, new Vector2(camTex.width, camTex.height), fromRawCpuToViewport);
+
+        pipelineDebugger.logTransormedCorners(displayMatrix, new Vector2(camTex.width, camTex.height), fromRawCpuToViewport);
+
+        //pipelineDebugger.SetupPrinted();
     }
 
-    private Vector2 fromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cord)
+    public Vector2 fromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cord)
     {
         float u = cord.x / camTex.width;
         float v = cord.y / camTex.height;
