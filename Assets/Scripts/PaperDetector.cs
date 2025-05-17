@@ -27,6 +27,25 @@ public class PaperDetector : MonoBehaviour
     private lineSegment[] segments = new lineSegment[4];
     private static readonly List<ARRaycastHit> hits = new();
 
+    //temp
+    private Vector2[] imgCorners;
+    private Matrix4x4 D;
+    private Texture2D whiteDot;
+
+    void OnGUI()
+    {
+        if (debugImage.texture == null) return;   // no frame yet
+
+        foreach (var cpu in imgCorners)
+        {
+            Vector2 vp = fromRawCpuToViewport(D, cpu); // 0..1
+            Vector2 gui = new Vector2(vp.x * Screen.width,
+                                      (1 - vp.y) * Screen.height); // GUI y is top→down
+
+            GUI.DrawTexture(new Rect(gui, new Vector2(18, 18)), whiteDot);
+        }
+    }
+
 
 
     struct lineSegment
@@ -41,6 +60,13 @@ public class PaperDetector : MonoBehaviour
         InitLines();
         arPlaneManager.planePrefab.active = true;
         lineMaterial.renderQueue = 3100;
+
+        // create a 1×1 white texture
+        whiteDot = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        whiteDot.SetPixel(0, 0, Color.white);
+        whiteDot.Apply();
+
+
         Debug.Log("PaperDetector initialized.");
     }
 
@@ -59,7 +85,7 @@ public class PaperDetector : MonoBehaviour
         UpdateTexture(cpu);        
 
         byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
-        if (!PaperPlugin.FindPaperCorners(rgba, camTex.width, camTex.height, out Vector2[] imgCorners))
+        if (!PaperPlugin.FindPaperCorners(rgba, camTex.width, camTex.height, out imgCorners))
         {
             foreach (var seg in segments)
                 seg.lr.enabled = false;
@@ -77,6 +103,7 @@ public class PaperDetector : MonoBehaviour
         else
         {
             displayMatrix = args.displayMatrix.Value;
+            D = displayMatrix;
         }
 
         // 2) convert each raw image‐space corner → normalized UV → into the same UV space
@@ -121,7 +148,7 @@ public class PaperDetector : MonoBehaviour
 
         //remove cropping
         float topCrop = 1f - D[2, 1];
-        Debug.Log($"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!topCrop = {topCrop}");
+        Debug.Log($"topCrop = {topCrop}");
         float scaleY = 1f / (1f - 2f*topCrop);
 
         mapped.y = (mapped.y - topCrop) * scaleY;
