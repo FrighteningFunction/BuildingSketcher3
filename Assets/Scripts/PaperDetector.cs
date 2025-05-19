@@ -94,6 +94,8 @@ public class PaperDetector : MonoBehaviour
             return;
         }
 
+        MarkCpuCornersOnTexture(new Color32(255, 0, 0, 255));
+
         Matrix4x4 displayMatrix;
         if (!args.displayMatrix.HasValue)
         {
@@ -252,5 +254,38 @@ public class PaperDetector : MonoBehaviour
 
             Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
         }
+    }
+
+    void MarkCpuCornersOnTexture(Color32 dotColor, int dotSize = 7)
+    {
+        if (imgCorners == null || camTex == null) return;
+
+        int w = camTex.width;
+        int h = camTex.height;
+        int half = dotSize / 2;
+
+        // pull pixel array once
+        var pixels = camTex.GetPixels32();
+
+        foreach (Vector2 c in imgCorners)
+        {
+            int cx = Mathf.RoundToInt(c.x);
+            int cy = Mathf.RoundToInt(c.y);
+
+            // Texture2D origin is bottom-left, CPU origin is top-left → flip Y: NO, for some reason no flip is needed.
+            //cy = h - 1 - cy;
+
+            for (int dy = -half; dy <= half; ++dy)
+                for (int dx = -half; dx <= half; ++dx)
+                {
+                    int x = cx + dx;
+                    int y = cy + dy;
+                    if (x < 0 || x >= w || y < 0 || y >= h) continue;
+                    pixels[y * w + x] = dotColor;
+                }
+        }
+
+        camTex.SetPixels32(pixels);
+        camTex.Apply(false);         // no mip update, fast
     }
 }
