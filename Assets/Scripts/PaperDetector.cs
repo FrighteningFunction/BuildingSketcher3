@@ -117,11 +117,11 @@ public class PaperDetector : MonoBehaviour
         }
 
 
-        Vector2[] ordered = OrderCorners(viewportCorners);
+        //Vector2[] ordered = OrderCorners(viewportCorners);
 
         for (int i = 0; i < viewportCorners.Length; ++i)
             Debug.Log($"vp[{i}] = {viewportCorners[i]}");   // should stay between 0-1
-        PlaceLinesFromViewport(ordered);
+        PlaceLinesFromViewport(viewportCorners);
 
         //Debugging
 
@@ -142,18 +142,17 @@ public class PaperDetector : MonoBehaviour
         Vector4 uv = new Vector4(u, v, 1f, 0f);
         Vector4 mapped = D.transpose * uv;
 
-        //if (mapped.w != 0f)                                   // <-- projective divide
-        //{
-        //    mapped.x /= mapped.w;
-        //    mapped.y /= mapped.w;
-        //}
-
         //remove cropping
-        float topCrop = 1f - D[2, 1];
-        Debug.Log($"topCrop = {topCrop}");
-        float scaleY = 1f / (1f - 2f*topCrop);
+        //float topCrop = 1f - D[2, 1];
+        //Debug.Log($"topCrop = {topCrop}");
+        //float scaleY = 1f / (1f - 2f*topCrop);
 
-        mapped.y = (mapped.y - topCrop) * scaleY;
+        //mapped.y = (mapped.y - topCrop) * scaleY;
+
+        //convert to screen
+
+        mapped.x *= Screen.width;
+        mapped.y *= Screen.height;
 
 
         Debug.Log($"mapped = {mapped}");
@@ -161,11 +160,11 @@ public class PaperDetector : MonoBehaviour
         return new Vector2(mapped.x, mapped.y);
     }
 
-    Vector2[] OrderCorners(Vector2[] c)
-    {
-        Vector2 center = c.Aggregate(Vector2.zero, (a, b) => a + b) / 4f;
-        return c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
-    }
+    //Vector2[] OrderCorners(Vector2[] c)
+    //{
+    //    Vector2 center = c.Aggregate(Vector2.zero, (a, b) => a + b) / 4f;
+    //    return c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
+    //}
 
     void InitLines()
     {
@@ -191,7 +190,6 @@ public class PaperDetector : MonoBehaviour
             inputRect = new RectInt(0, 0, img.width, img.height),
             outputDimensions = new Vector2Int(img.width, img.height),
             outputFormat = TextureFormat.RGBA32
-            
         };
 
         if (camTex == null || camTex.width != img.width || camTex.height != img.height)
@@ -217,7 +215,7 @@ public class PaperDetector : MonoBehaviour
         for (int i = 0; i < vpCorners.Length; i++)
         {
             Vector2 vp = vpCorners[i];
-            var ray = Camera.main.ViewportPointToRay(vp);
+            var ray = Camera.main.ScreenPointToRay(vp);
             Vector3 hitPt;
             bool hitPlane = false;
 
@@ -272,7 +270,8 @@ public class PaperDetector : MonoBehaviour
             int cx = Mathf.RoundToInt(c.x);
             int cy = Mathf.RoundToInt(c.y);
 
-            // Texture2D origin is bottom-left, CPU origin is top-left → flip Y: NO, for some reason no flip is needed.
+            // Texture2D origin is bottom-left, CPU origin is top-left → flip Y:
+            // For some reason, no. Maybe because opencv measured it from Texture2D?
             //cy = h - 1 - cy;
 
             for (int dy = -half; dy <= half; ++dy)
