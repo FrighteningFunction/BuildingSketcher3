@@ -134,29 +134,29 @@ public class PaperDetector : MonoBehaviour
         //pipelineDebugger.SetupPrinted();
     }
 
-    public Vector2 fromRawCpuToViewport(Matrix4x4 D, Vector2 cord)
+    Vector2 fromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cpuPx)
     {
-        float u = cord.x / camTex.width;
-        float v = cord.y / camTex.height;
+        // 1. Normalise to 0-1 
+        //    while GL / Unity UV origin is bottom-left.
+        float u = cpuPx.x / camTex.width;
+        float v = cpuPx.y / camTex.height;
 
-        Vector4 uv = new Vector4(u, v, 1f, 0f);
-        Vector4 mapped = D.transpose * uv;
+        // 2. Build a **row** vector  (u , v , 1 , 0)  and multiply by the (row-
+        //    major) display matrix.  Unity matrices are column-major, so we take
+        //    the transpose once to compensate.
+        Vector4 uvRow = new Vector4(u, v, 1f, 0f);
+        Vector4 mapped = displayMatrix.transpose * uvRow;
 
-        //remove cropping
-        //float topCrop = 1f - D[2, 1];
-        //Debug.Log($"topCrop = {topCrop}");
-        //float scaleY = 1f / (1f - 2f*topCrop);
+        // 3. Perspective divide — needed only when ARCore’s image-stabilisation
+        //    variant is active (then .z ≠ 1).  Harmless otherwise.
+        if (Mathf.Abs(mapped.z) > 1e-6f)
+        {
+            mapped.x /= mapped.z;
+            mapped.y /= mapped.z;
+        }
 
-        //mapped.y = (mapped.y - topCrop) * scaleY;
-
-        //convert to screen
-
-        mapped.x *= Screen.width;
-        mapped.y *= Screen.height;
-
-
-        Debug.Log($"mapped = {mapped}");
-
+        // 4. Return **viewport** coordinates (still 0-1).  Caller decides whether
+        //    to turn them into GUI pixels or cast a ray, etc.
         return new Vector2(mapped.x, mapped.y);
     }
 
@@ -215,7 +215,7 @@ public class PaperDetector : MonoBehaviour
         for (int i = 0; i < vpCorners.Length; i++)
         {
             Vector2 vp = vpCorners[i];
-            var ray = Camera.main.ScreenPointToRay(vp);
+            var ray = Camera.main.ViewportPointToRay(vp);
             Vector3 hitPt;
             bool hitPlane = false;
 
