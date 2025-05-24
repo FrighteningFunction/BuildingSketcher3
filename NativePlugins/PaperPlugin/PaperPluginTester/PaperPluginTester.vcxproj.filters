@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TestFiles">
+      <UniqueIdentifier>{7dadc675-1124-4273-b979-a8449dd84992}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaperPluginTester.cpp">
@@ -20,15 +23,30 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="test_image.rgba" />
+    <None Include="TestFiles\test_image.rgba">
+      <Filter>TestFiles</Filter>
+    </None>
+    <None Include="TestFiles\test_image_drawing.rgba">
+      <Filter>TestFiles</Filter>
+    </None>
+    <None Include="TestFiles\test_image_tilted.rgba">
+      <Filter>TestFiles</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test_image.txt" />
-    <Text Include="test_image_drawing.txt" />
-    <Text Include="test_image_tilted.txt" />
+    <Text Include="TestFiles\test_image.txt">
+      <Filter>TestFiles</Filter>
+    </Text>
+    <Text Include="TestFiles\test_image_drawing.txt">
+      <Filter>TestFiles</Filter>
+    </Text>
+    <Text Include="TestFiles\test_image_tilted.txt">
+      <Filter>TestFiles</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test_image_drawing.rgba" />
-    <None Include="test_image_tilted.rgba" />
+    <Image Include="TestFiles\papertest2.jpg">
+      <Filter>TestFiles</Filter>
+    </Image>
   </ItemGroup>
 </Project>

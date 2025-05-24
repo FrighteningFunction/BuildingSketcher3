@@ -3,7 +3,6 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v17
 C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(520,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
   The vcpkg manifest was disabled, but we found a manifest file in C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
   PaperPluginTester.cpp
-C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPluginTester\PaperPluginTester.cpp(69,20): warning C4566: character represented by universal-character-name '\u21D2' cannot be represented in the current code page (1252)
   PaperPluginTester.vcxproj -> C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\build\Debug\PaperPluginTester.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.
