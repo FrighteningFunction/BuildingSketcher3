@@ -100,48 +100,55 @@ public class PaperEdgeLines : MonoBehaviour
 
     public void PlaceLinesFromViewport(Vector2[] vpCorners)
     {
+        // Step 1: Convert all viewport corners to world positions, also track fallback usage.
         Vector3[] worldPos = new Vector3[vpCorners.Length];
         bool[] usedFallback = new bool[vpCorners.Length];
 
         for (int i = 0; i < vpCorners.Length; i++)
         {
-            Vector2 vp = vpCorners[i];
-            var ray = Camera.main.ViewportPointToRay(vp);
-            Vector3 hitPt;
-            bool hitPlane = false;
-
-            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
-            {
-                var chosen = hits[0];
-                var plane = arPlaneManager.GetPlane(chosen.trackableId);
-                hitPt = chosen.pose.position;
-                hitPlane = true;
-            }
-            else
-            {
-                hitPt = ray.GetPoint(1.0f);
-            }
-
-            worldPos[i] = hitPt;
-
-            usedFallback[i] = !hitPlane;
-
-            Debug.Log($" Corner[{i}] to World: {worldPos[i]:F2} {(hitPlane ? "YES" : "NO")}");
+            TryRaycastViewportPoint(vpCorners[i], out worldPos[i], out usedFallback[i]);
+            Debug.Log($" Corner[{i}] to World: {worldPos[i]:F2} {(usedFallback[i] ? "NO" : "YES")}");
         }
 
+        // Step 2: Draw segments (lines) between the world positions
         for (int i = 0; i < 4; i++)
         {
             int j = (i + 1) % 4;
-            var seg = segments[i];
-            seg.lr.enabled = true;
-            seg.lr.SetPosition(0, worldPos[i]);
-            seg.lr.SetPosition(1, worldPos[j]);
-
-            bool anyFallback = usedFallback[i] || usedFallback[j];
-            Color col = anyFallback ? Color.yellow : Color.blue;
-            seg.lr.startColor = seg.lr.endColor = col;
-
-            Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
+            DrawSegment(i, j, worldPos, usedFallback);
         }
     }
+
+    // Helper: Try to get a world position from a viewport point, with fallback.
+    private void TryRaycastViewportPoint(Vector2 vp, out Vector3 worldPos, out bool usedFallback)
+    {
+        var ray = Camera.main.ViewportPointToRay(vp);
+
+        if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
+        {
+            var chosen = hits[0];
+            worldPos = chosen.pose.position;
+            usedFallback = false;
+        }
+        else
+        {
+            worldPos = ray.GetPoint(1.0f); // fallback
+            usedFallback = true;
+        }
+    }
+
+    // Helper: Draw a single segment (line) between two world points.
+    private void DrawSegment(int i, int j, Vector3[] worldPos, bool[] usedFallback)
+    {
+        var seg = segments[i];
+        seg.lr.enabled = true;
+        seg.lr.SetPosition(0, worldPos[i]);
+        seg.lr.SetPosition(1, worldPos[j]);
+
+        bool anyFallback = usedFallback[i] || usedFallback[j];
+        Color col = anyFallback ? Color.yellow : Color.blue;
+        seg.lr.startColor = seg.lr.endColor = col;
+
+        Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
+    }
+
 }
