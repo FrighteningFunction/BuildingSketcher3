@@ -4,15 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
-extern "C" {
-    // imageData: pointer to RGBA image data (unsigned char*, width*height*4)
-    // width, height: image dimensions
-    // outLines: pointer to output float array, format: [x1, y1, x2, y2, x1, y1, x2, y2, ...]
-    // maxLines: maximum number of lines to export (each line = 4 floats)
-    // Returns: actual number of lines written to outLines
-    int FindBlackLines(unsigned char* imageData, int width, int height, float* outLines, int maxLines);
-}
-
+extern "C" __declspec(dllexport)
 int FindBlackLines(unsigned char* imageData, int width, int height, float* outLines, int maxLines)
 {
     cv::Mat img(height, width, CV_8UC4, imageData);
