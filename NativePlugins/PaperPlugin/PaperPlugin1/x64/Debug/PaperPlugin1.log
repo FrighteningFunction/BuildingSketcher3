@@ -3,6 +3,159 @@
   pch.cpp
   dllmain.cpp
   LineDetector.cpp
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,36): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,30): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,51): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(30,45): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,37): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,31): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,53): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244: 'argument': conversion from 'const _Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(51,47): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,32): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,26): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,47): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244: 'argument': conversion from '_Tp' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:             _Tp=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:         and
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(79,41): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,18): warning C4244: '/=': conversion from 'double' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,18): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,18): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,18): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,18): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,32): warning C4244: '/=': conversion from 'double' to '_Tp', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,32): warning C4244:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,32): warning C4244:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,32): warning C4244:             _Tp=float
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,32): warning C4244:         ]
+  (compiling source file '/LineDetector.cpp')
+  
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(133,45): warning C4267: 'argument': conversion from 'size_t' to 'const _Ty', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(133,45): warning C4267:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(133,45): warning C4267:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(133,45): warning C4267:             _Ty=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(133,45): warning C4267:         ]
+  (compiling source file '/LineDetector.cpp')
+  
   PaperPlugin1.cpp
   Generating Code...
      Creating library C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\..\build\Debug\PaperPlugin1.lib and object C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\..\build\Debug\PaperPlugin1.exp
