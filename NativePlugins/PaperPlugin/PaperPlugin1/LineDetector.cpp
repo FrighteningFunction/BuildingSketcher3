@@ -24,9 +24,17 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     cv::Mat edges;
     cv::Canny(bw, edges, 50, 200, 3);
 
+    cv::Mat closed;
+    cv::morphologyEx(edges, closed, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1, -1), 2);
+
     // Use HoughLinesP to find straight lines
     std::vector<cv::Vec4i> lines;
-    cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 50, 50, 10);
+
+	int minLineLength = 350;
+	int maxLineGap = 30;
+    int houghThreshold = 100;
+
+    cv::HoughLinesP(closed, lines, 1, CV_PI / 180, houghThreshold, minLineLength, maxLineGap);
 
     int linesExported = 0;
     for (size_t i = 0; i < lines.size() && linesExported < maxLines; ++i)
