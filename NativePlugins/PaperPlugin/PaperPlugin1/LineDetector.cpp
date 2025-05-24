@@ -9,16 +9,15 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
 {
     cv::Mat img(height, width, CV_8UC4, imageData);
     cv::Mat gray;
-    cv::cvtColor(img, gray, cv::COLOR_RGBA2GRAY);
+    cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
 
-    // Invert image if black lines are drawn on white paper
-    // (optional - depends on your data, remove if unnecessary)
-    cv::Mat inverted;
-    cv::bitwise_not(gray, inverted);
 
-    // Threshold to get black lines (if necessary)
+    cv::Mat blurred;
+    cv::GaussianBlur(gray, blurred, cv::Size(9, 9), 0);
+
+
     cv::Mat bw;
-    cv::threshold(inverted, bw, 50, 255, cv::THRESH_BINARY);
+    cv::adaptiveThreshold(blurred, bw, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY_INV, 21, 10);
 
     // Use Canny edge detector to emphasize edges
     cv::Mat edges;
@@ -30,9 +29,9 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     // Use HoughLinesP to find straight lines
     std::vector<cv::Vec4i> lines;
 
-	int minLineLength = 350;
-	int maxLineGap = 30;
-    int houghThreshold = 100;
+	int minLineLength = 250;
+	int maxLineGap = 50;
+    int houghThreshold = 90;
 
     cv::HoughLinesP(closed, lines, 1, CV_PI / 180, houghThreshold, minLineLength, maxLineGap);
 
