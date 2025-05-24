@@ -38,7 +38,7 @@ public class PaperDetector : MonoBehaviour
 
         foreach (var cpu in imgCorners)
         {
-            Vector2 vp = fromRawCpuToViewport(D, cpu); // 0..1
+            Vector2 vp = Converter.FromRawCpuToViewport(D, cpu, new Vector2(camTex.width, camTex.height)); // 0..1
             Vector2 gui = new Vector2(vp.x * Screen.width,
                                       (1 - vp.y) * Screen.height); // GUI y is top→down
 
@@ -113,7 +113,7 @@ public class PaperDetector : MonoBehaviour
         for(int i = 0; i < imgCorners.Length; i++)
         { 
 
-            viewportCorners[i] = fromRawCpuToViewport(displayMatrix, imgCorners[i]);
+            viewportCorners[i] = Converter.FromRawCpuToViewport(displayMatrix, imgCorners[i], new Vector2(camTex.width, camTex.height));
         }
 
 
@@ -125,46 +125,12 @@ public class PaperDetector : MonoBehaviour
 
         //Debugging
 
-        pipelineDebugger.printConverterCornersDebug(displayMatrix, new Vector2(camTex.width, camTex.height), fromRawCpuToViewport);
+        pipelineDebugger.printConverterCornersDebug(displayMatrix, new Vector2(camTex.width, camTex.height), Converter.FromRawCpuToViewport);
 
-        pipelineDebugger.logTransormedCorners(displayMatrix, new Vector2(camTex.width, camTex.height), fromRawCpuToViewport);
+        pipelineDebugger.logTransormedCorners(displayMatrix, new Vector2(camTex.width, camTex.height), Converter.FromRawCpuToViewport);
 
         pipelineDebugger.printDisplayMatrix(displayMatrix);
-
-        //pipelineDebugger.SetupPrinted();
     }
-
-    Vector2 fromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cpuPx)
-    {
-        // 1. Normalise to 0-1 
-        //    while GL / Unity UV origin is bottom-left.
-        float u = cpuPx.x / camTex.width;
-        float v = cpuPx.y / camTex.height;
-
-        // 2. Build a **row** vector  (u , v , 1 , 0)  and multiply by the (row-
-        //    major) display matrix.  Unity matrices are column-major, so we take
-        //    the transpose once to compensate.
-        Vector4 uvRow = new Vector4(u, v, 1f, 0f);
-        Vector4 mapped = displayMatrix.transpose * uvRow;
-
-        // 3. Perspective divide — needed only when ARCore’s image-stabilisation
-        //    variant is active (then .z ≠ 1).  Harmless otherwise.
-        if (Mathf.Abs(mapped.z) > 1e-6f)
-        {
-            mapped.x /= mapped.z;
-            mapped.y /= mapped.z;
-        }
-
-        // 4. Return **viewport** coordinates (still 0-1).  Caller decides whether
-        //    to turn them into GUI pixels or cast a ray, etc.
-        return new Vector2(mapped.x, mapped.y);
-    }
-
-    //Vector2[] OrderCorners(Vector2[] c)
-    //{
-    //    Vector2 center = c.Aggregate(Vector2.zero, (a, b) => a + b) / 4f;
-    //    return c.OrderBy(p => Mathf.Atan2(p.y - center.y, p.x - center.x)).ToArray();
-    //}
 
     void InitLines()
     {
