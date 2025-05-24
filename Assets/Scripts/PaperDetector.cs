@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.GPUSort;
 
 [RequireComponent(typeof(ARCameraManager))]
 public class PaperDetector : MonoBehaviour
@@ -17,57 +18,22 @@ public class PaperDetector : MonoBehaviour
     [SerializeField] ARPlaneManager arPlaneManager;
     [SerializeField] RawImage debugImage;
     [SerializeField] PipelineDebugger pipelineDebugger;
+    [SerializeField] PaperEdgeLines paperEdgeLines;
 
-    [Header("Line Settings")]
-    [SerializeField] Material lineMaterial;
-    [SerializeField] float lineWidth = 0.005f;
+    [SerializeField] bool debugMode = true;
 
     /* ---------- internals ---------- */
     private Texture2D camTex;
-    private lineSegment[] segments = new lineSegment[4];
-    private static readonly List<ARRaycastHit> hits = new();
-
-    //temp
     private Vector2[] imgCorners;
     private Matrix4x4 D;
-    private Texture2D whiteDot;
+    
 
     void OnGUI()
     {
-        if (debugImage.texture == null) return;   // no frame yet
-
-        foreach (var cpu in imgCorners)
-        {
-            Vector2 vp = Converter.FromRawCpuToViewport(D, cpu, new Vector2(camTex.width, camTex.height)); // 0..1
-            Vector2 gui = new Vector2(vp.x * Screen.width,
-                                      (1 - vp.y) * Screen.height); // GUI y is top→down
-
-            GUI.DrawTexture(new Rect(gui, new Vector2(18, 18)), whiteDot);
-        }
-    }
-
-
-
-    struct lineSegment
-    {
-        public LineRenderer lr;
-        public bool end0Fallback;
-        public bool end1Fallback;
-    }
-
-    void Awake()
-    {
-        InitLines();
-        arPlaneManager.planePrefab.active = true;
-        lineMaterial.renderQueue = 3100;
-
-        // create a 1×1 white texture
-        whiteDot = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-        whiteDot.SetPixel(0, 0, Color.white);
-        whiteDot.Apply();
-
-
-        Debug.Log("PaperDetector initialized.");
+        paperEdgeLines.DrawWhiteDots(D, 
+            debugImage != null, 
+            imgCorners, 
+            camTex != null ? new Vector2(camTex.width, camTex.height) : Vector2.zero);
     }
 
     void OnEnable() => cameraManager.frameReceived += OnFrame;
@@ -76,80 +42,82 @@ public class PaperDetector : MonoBehaviour
     void OnFrame(ARCameraFrameEventArgs args)
     {
 
-        Debug.Log("--------------------------------NEW FRAME---------------------------------\n"+
+        Debug.Log("--------------------------------NEW FRAME---------------------------------\n" +
                   "--------------------------------------------------------------------------");
 
         if (!cameraManager.TryAcquireLatestCpuImage(out var cpu))
             return;
 
-        UpdateTexture(cpu);        
+        UpdateTexture(cpu);
 
+        if(!TryDetectPaperCorners()) return;
+
+        FetchDisplayMatrix(args);
+
+        Vector2[] viewportCorners = ConvertImageCornersToViewport();
+
+        paperEdgeLines.PlaceLinesFromViewport(viewportCorners);
+
+       
+        ExecuteDebug(viewportCorners);
+    }
+
+    private bool TryDetectPaperCorners()
+    {
         byte[] rgba = camTex.GetRawTextureData<byte>().ToArray();
         if (!PaperPlugin.FindPaperCorners(rgba, camTex.width, camTex.height, out imgCorners))
         {
-            foreach (var seg in segments)
-                seg.lr.enabled = false;
+            paperEdgeLines.DisableLines();
 
             Debug.LogWarning(" No paper corners detected.");
-            return;
+            return false;
         }
 
-        MarkCpuCornersOnTexture(new Color32(255, 0, 0, 255));
+        return true;
+    }
 
-        Matrix4x4 displayMatrix;
+
+    private Vector2[] ConvertImageCornersToViewport()
+    {
+        // 2) convert each raw image‐space corner → normalized UV → into the same UV space
+        Vector2[] viewportCorners = new Vector2[imgCorners.Length];
+        for (int i = 0; i < imgCorners.Length; i++)
+        {
+
+            viewportCorners[i] = Converter.FromRawCpuToViewport(D, imgCorners[i], new Vector2(camTex.width, camTex.height));
+        }
+
+        return viewportCorners;
+    }
+
+    private void FetchDisplayMatrix(ARCameraFrameEventArgs args) {
         if (!args.displayMatrix.HasValue)
         {
-            Debug.LogWarning(" No display matrix available.");
+            Debug.LogError(" No display matrix available.");
             return;
         }
         else
         {
-            displayMatrix = args.displayMatrix.Value;
-            D = displayMatrix;
+            D = args.displayMatrix.Value;
         }
-
-        // 2) convert each raw image‐space corner → normalized UV → into the same UV space
-        Vector2[] viewportCorners = new Vector2[imgCorners.Length];
-        for(int i = 0; i < imgCorners.Length; i++)
-        { 
-
-            viewportCorners[i] = Converter.FromRawCpuToViewport(displayMatrix, imgCorners[i], new Vector2(camTex.width, camTex.height));
-        }
-
-
-        //Vector2[] ordered = OrderCorners(viewportCorners);
-
-        for (int i = 0; i < viewportCorners.Length; ++i)
-            Debug.Log($"vp[{i}] = {viewportCorners[i]}");   // should stay between 0-1
-        PlaceLinesFromViewport(viewportCorners);
-
-        //Debugging
-
-        pipelineDebugger.printConverterCornersDebug(displayMatrix, new Vector2(camTex.width, camTex.height), Converter.FromRawCpuToViewport);
-
-        pipelineDebugger.logTransormedCorners(displayMatrix, new Vector2(camTex.width, camTex.height), Converter.FromRawCpuToViewport);
-
-        pipelineDebugger.printDisplayMatrix(displayMatrix);
     }
 
-    void InitLines()
+    private void ExecuteDebug(Vector2[] viewportCorners)
     {
-        for (int i = 0; i < 4; ++i)
-        {
-            var go = new GameObject($"PaperEdge_{i}");
-            var lr = go.AddComponent<LineRenderer>();
-            lr.material = lineMaterial;
-            lr.useWorldSpace = true;
-            lr.loop = false;
-            lr.positionCount = 2;
-            lr.startWidth = lr.endWidth = lineWidth;
-            segments[i].lr = lr;
-        }
+        if (!debugMode) return;
 
-        Debug.Log("LineRenderers initialized.");
+        pipelineDebugger.printPaperCornerViewportCoords(viewportCorners);
+
+        pipelineDebugger.printConverterCornersDebug(D, new Vector2(camTex.width, camTex.height), Converter.FromRawCpuToViewport);
+
+        pipelineDebugger.logTransormedCorners(D, new Vector2(camTex.width, camTex.height), Converter.FromRawCpuToViewport);
+
+        pipelineDebugger.printDisplayMatrix(D);
+
+        MarkCpuCornersOnTexture(new Color32(255, 0, 0, 255));
     }
 
-    void UpdateTexture(XRCpuImage img)
+    private void UpdateTexture(XRCpuImage img)
     {
         var p = new XRCpuImage.ConversionParams
         {
@@ -173,54 +141,9 @@ public class PaperDetector : MonoBehaviour
         img.Dispose();
     }
 
-    void PlaceLinesFromViewport(Vector2[] vpCorners)
-    {
-        Vector3[] worldPos = new Vector3[vpCorners.Length];
-        bool[] usedFallback = new bool[vpCorners.Length];
 
-        for (int i = 0; i < vpCorners.Length; i++)
-        {
-            Vector2 vp = vpCorners[i];
-            var ray = Camera.main.ViewportPointToRay(vp);
-            Vector3 hitPt;
-            bool hitPlane = false;
 
-            if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
-            {
-                var chosen = hits[0];
-                var plane = arPlaneManager.GetPlane(chosen.trackableId);
-                hitPt = chosen.pose.position;
-                hitPlane = true;
-            }
-            else
-            {
-                hitPt = ray.GetPoint(1.0f);
-            }
-
-            worldPos[i] = hitPt;
-            
-            usedFallback[i] = !hitPlane;
-
-            Debug.Log($" Corner[{i}] to World: {worldPos[i]:F2} {(hitPlane ? "YES" : "NO")}");
-        }
-
-        for (int i = 0; i < 4; i++)
-        {
-            int j = (i + 1) % 4;
-            var seg = segments[i];
-            seg.lr.enabled = true;
-            seg.lr.SetPosition(0, worldPos[i]);
-            seg.lr.SetPosition(1, worldPos[j]);
-
-            bool anyFallback = usedFallback[i] || usedFallback[j];
-            Color col = anyFallback ? Color.yellow : Color.blue;
-            seg.lr.startColor = seg.lr.endColor = col;
-
-            Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
-        }
-    }
-
-    void MarkCpuCornersOnTexture(Color32 dotColor, int dotSize = 7)
+    private void MarkCpuCornersOnTexture(Color32 dotColor, int dotSize = 7)
     {
         if (imgCorners == null || camTex == null) return;
 

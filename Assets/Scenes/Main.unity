@@ -1109,6 +1109,7 @@ GameObject:
   - component: {fileID: 1860563526}
   - component: {fileID: 1860563525}
   - component: {fileID: 1860563527}
+  - component: {fileID: 1860563529}
   m_Layer: 0
   m_Name: ScriptManager
   m_TagString: Untagged
@@ -1148,8 +1149,8 @@ MonoBehaviour:
   arPlaneManager: {fileID: 151853166}
   debugImage: {fileID: 1402336279}
   pipelineDebugger: {fileID: 1860563528}
-  lineMaterial: {fileID: 2100000, guid: 24f060dd05c02374c9d1d97b8410968d, type: 2}
-  lineWidth: 0.005
+  paperEdgeLines: {fileID: 1860563529}
+  debugMode: 1
 --- !u!114 &1860563524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1162,7 +1163,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a15b0f7824f63646af717857cd19834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testImage: {fileID: 2800000, guid: 8de5fa55b3a7444478cce04883254afa, type: 3}
 --- !u!114 &1860563525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1289,6 +1289,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6037c52bfa4d6774082c0a2e5a87fcf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1860563529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860563521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a645a9ceae262d648b00a4672a72d5f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  raycastManager: {fileID: 608830363}
+  arPlaneManager: {fileID: 151853166}
+  debugMode: 1
+  lineMaterial: {fileID: 2100000, guid: 24f060dd05c02374c9d1d97b8410968d, type: 2}
+  lineWidth: 0.005
 --- !u!114 &2001374502 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6402244310720262706, guid: 48cb3fb68c91eb94999fd99957eb0cae,

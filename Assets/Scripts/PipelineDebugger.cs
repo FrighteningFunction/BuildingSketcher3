@@ -61,4 +61,10 @@ public class PipelineDebugger : MonoBehaviour
             Debug.Log("Display matrix normal: \n" + D);
         }
     }
+
+    public void printPaperCornerViewportCoords(Vector2[] viewportCorners) 
+    {
+        for (int i = 0; i < viewportCorners.Length; ++i)
+            Debug.Log($"vp[{i}] = {viewportCorners[i]}");   // should stay between 0-1
+    }
 }
