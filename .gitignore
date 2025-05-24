@@ -93,6 +93,4 @@ AndroidPlugins/.gradle
 
 ## opencv files
 
-AndroidPlugins/app/src/main/cpp/OpenCV-android-sdk
-
-AndroidPlugins/opencv
+AndroidPlugins/app/src/main/cpp/OpenCV-android-sdk/
