@@ -61,7 +61,10 @@ public class PaperDetector : MonoBehaviour
 
         paperEdgeLines.PlaceLinesFromViewport(viewportCorners);
 
-        wallGenerator.VisualizeLines(camTex, D, raycastManager);
+        if (imgCorners != null && imgCorners.Length == 4)
+        {
+            wallGenerator.VisualizeLines(camTex, D, raycastManager, imgCorners);
+        }
 
         ExecuteDebug(viewportCorners);
     }

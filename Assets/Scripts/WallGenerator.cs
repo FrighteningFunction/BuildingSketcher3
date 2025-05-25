@@ -5,17 +5,28 @@ using UnityEngine.XR.ARSubsystems;
 
 public class WallGenerator : MonoBehaviour
 {
-    [Header("Assign your Cube here")]
+    [Header("Assign the Cube here, set up x and y for thin!")]
     public GameObject linePrefab;
     [Header("Parent for organizing spawned lines")]
     public Transform linesParent;
 
     /// Call this after paper is detected and lines need to be visualized.
-    public void VisualizeLines(Texture2D tex, Matrix4x4 displayMatrix, ARRaycastManager raycastManager)
+    public void VisualizeLines(
+        Texture2D tex, 
+        Matrix4x4 displayMatrix, 
+        ARRaycastManager raycastManager,
+        Vector2[] paperQuad = null)
     {
         if (tex == null)
         {
             Debug.LogError("Texture2D is null!");
+            return;
+        }
+
+        // Don't show walls unless paper is found
+        if (paperQuad == null || paperQuad.Length != 4)
+        {
+            CleanupOldLines();
             return;
         }
 
@@ -25,9 +36,14 @@ public class WallGenerator : MonoBehaviour
 
         foreach (var line in detectedLines)
         {
+
+            // Clip line to paper
+            if (!PaperPolygonClipper.ClipLineToQuad(line.Item1, line.Item2, paperQuad, out var clippedA, out var clippedB))
+                continue;
+
             // 1. Pixel to viewport (normalized)
-            Vector2 p1_viewport = Converter.FromRawCpuToViewport(displayMatrix, line.Item1, new Vector2(tex.width, tex.height));
-            Vector2 p2_viewport = Converter.FromRawCpuToViewport(displayMatrix, line.Item2, new Vector2(tex.width, tex.height));
+            Vector2 p1_viewport = Converter.FromRawCpuToViewport(displayMatrix, clippedA, new Vector2(tex.width, tex.height));
+            Vector2 p2_viewport = Converter.FromRawCpuToViewport(displayMatrix, clippedB, new Vector2(tex.width, tex.height));
 
             // 2. Viewport to AR world
             Vector3 p1_world = ViewportToARWorld(p1_viewport, raycastManager);
@@ -50,10 +66,10 @@ public class WallGenerator : MonoBehaviour
     {
         Vector2[][] detectedLinesArr;
 
-        int maxlines = 32;
+        const int MaxLines = 256;
 
         int numLines = PaperPlugin.FindBlackLines(
-            tex.GetRawTextureData(), tex.width, tex.height, out detectedLinesArr, maxlines);
+            tex.GetRawTextureData(), tex.width, tex.height, out detectedLinesArr, MaxLines);
 
         var results = new List<(Vector2, Vector2)>(numLines);
         for (int i = 0; i < numLines; ++i)
