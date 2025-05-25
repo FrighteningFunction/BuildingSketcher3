@@ -58,13 +58,28 @@ public class PaperEdgeLines : MonoBehaviour
 
     public void DrawWhiteDots(Matrix4x4 D, bool firstFrame, Vector2[] imgCorners, Vector2 camTexSize)
     {
-        if (!firstFrame || !debugMode) return;   // no frame yet or we are not debugging
+        if (!firstFrame || !debugMode) return;
+
+        if (imgCorners == null || imgCorners.Length == 0)
+        {
+            Debug.LogWarning("DrawWhiteDots: imgCorners is null or empty!");
+            return;
+        }
+        if (whiteDot == null)
+        {
+            Debug.LogWarning("DrawWhiteDots: whiteDot texture is null! Did Awake() run?");
+            return;
+        }
+        if (camTexSize.x <= 1 || camTexSize.y <= 1)
+        {
+            Debug.LogWarning("DrawWhiteDots: camTexSize is invalid: " + camTexSize);
+            return;
+        }
 
         foreach (var cpu in imgCorners)
         {
-            Vector2 vp = Converter.FromRawCpuToViewport(D, cpu, new Vector2(camTexSize.x, camTexSize.y)); // 0..1
-            Vector2 gui = new Vector2(vp.x * Screen.width,
-                                      (1 - vp.y) * Screen.height); // GUI y is top→down
+            Vector2 vp = Converter.FromRawCpuToViewport(D, cpu, camTexSize); // 0..1
+            Vector2 gui = new Vector2(vp.x * Screen.width, (1 - vp.y) * Screen.height);
 
             GUI.DrawTexture(new Rect(gui, new Vector2(18, 18)), whiteDot);
         }
@@ -106,7 +121,7 @@ public class PaperEdgeLines : MonoBehaviour
 
         for (int i = 0; i < vpCorners.Length; i++)
         {
-            TryRaycastViewportPoint(vpCorners[i], out worldPos[i], out usedFallback[i]);
+            worldPos[i] = Converter.ViewportToWorld(vpCorners[i], raycastManager, hits, out usedFallback[i]);
             Debug.Log($" Corner[{i}] to World: {worldPos[i]:F2} {(usedFallback[i] ? "NO" : "YES")}");
         }
 
@@ -115,24 +130,6 @@ public class PaperEdgeLines : MonoBehaviour
         {
             int j = (i + 1) % 4;
             DrawSegment(i, j, worldPos, usedFallback);
-        }
-    }
-
-    // Helper: Try to get a world position from a viewport point, with fallback.
-    private void TryRaycastViewportPoint(Vector2 vp, out Vector3 worldPos, out bool usedFallback)
-    {
-        var ray = Camera.main.ViewportPointToRay(vp);
-
-        if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
-        {
-            var chosen = hits[0];
-            worldPos = chosen.pose.position;
-            usedFallback = false;
-        }
-        else
-        {
-            worldPos = ray.GetPoint(1.0f); // fallback
-            usedFallback = true;
         }
     }
 

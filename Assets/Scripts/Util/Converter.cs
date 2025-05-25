@@ -6,9 +6,11 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public static class Converter
 {
+
     public static Vector2 FromRawCpuToViewport(Matrix4x4 displayMatrix, Vector2 cpuPx, Vector2 XRCpuSize)
     {
         // 1. Normalise to 0-1 
@@ -33,5 +35,23 @@ public static class Converter
         // 4. Return **viewport** coordinates (still 0-1).  Caller decides whether
         //    to turn them into GUI pixels or cast a ray, etc.
         return new Vector2(mapped.x, mapped.y);
+    }
+
+    // Helper: Try to get a world position from a viewport point, with fallback.
+    public static Vector3 ViewportToWorld(Vector2 viewport, ARRaycastManager raycastManager, List<ARRaycastHit> hits, out bool usedFallback)
+    {
+        var ray = Camera.main.ViewportPointToRay(viewport);
+        if (raycastManager.Raycast(ray, hits, TrackableType.PlaneWithinPolygon))
+        {
+            var chosen = hits[0];
+            var worldPos = chosen.pose.position;
+
+            usedFallback = false;
+
+            return worldPos;
+        }
+
+        usedFallback = true;
+        return ray.GetPoint(1.0f);
     }
 }

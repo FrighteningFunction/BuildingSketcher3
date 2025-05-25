@@ -1105,7 +1105,6 @@ GameObject:
   - component: {fileID: 1860563522}
   - component: {fileID: 1860563523}
   - component: {fileID: 1860563528}
-  - component: {fileID: 1860563524}
   - component: {fileID: 1860563526}
   - component: {fileID: 1860563525}
   - component: {fileID: 1860563527}
@@ -1151,18 +1150,6 @@ MonoBehaviour:
   pipelineDebugger: {fileID: 1860563528}
   paperEdgeLines: {fileID: 1860563529}
   debugMode: 1
---- !u!114 &1860563524
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1860563521}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a15b0f7824f63646af717857cd19834, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1860563525
 MonoBehaviour:
   m_ObjectHideFlags: 0
