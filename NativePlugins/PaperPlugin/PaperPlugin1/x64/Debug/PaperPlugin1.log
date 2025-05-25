@@ -149,11 +149,11 @@ C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\Pa
 C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(83,32): warning C4244:         ]
   (compiling source file '/LineDetector.cpp')
   
-C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(136,45): warning C4267: 'argument': conversion from 'size_t' to 'const _Ty', possible loss of data
-C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(136,45): warning C4267:         with
-C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(136,45): warning C4267:         [
-C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(136,45): warning C4267:             _Ty=int
-C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(136,45): warning C4267:         ]
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(132,45): warning C4267: 'argument': conversion from 'size_t' to 'const _Ty', possible loss of data
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(132,45): warning C4267:         with
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(132,45): warning C4267:         [
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(132,45): warning C4267:             _Ty=int
+C:\Users\szoko\Documents\HomeWork\BuildingSketcher3\NativePlugins\PaperPlugin\PaperPlugin1\LineDetector.cpp(132,45): warning C4267:         ]
   (compiling source file '/LineDetector.cpp')
   
   PaperPlugin1.cpp

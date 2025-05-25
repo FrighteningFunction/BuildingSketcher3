@@ -110,25 +110,21 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     cv::Mat blurred;
     cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
 
-
     cv::Mat bw;
     cv::adaptiveThreshold(blurred, bw, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY_INV, 21, 10);
 
-    // Use Canny edge detector to emphasize edges
     cv::Mat edges;
     cv::Canny(bw, edges, 50, 200, 3);
 
-    cv::Mat closed;
-    cv::morphologyEx(edges, closed, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1, -1), 2);
+    // For debugging: save edges
+    // cv::imwrite("edges.png", edges);
 
-    // Use HoughLinesP to find straight lines
     std::vector<cv::Vec4i> lines;
-
     int minLineLength = 40;
     int maxLineGap = 20;
     int houghThreshold = 40;
 
-    cv::HoughLinesP(closed, lines, 1, CV_PI / 180, houghThreshold, minLineLength, maxLineGap);
+    cv::HoughLinesP(edges, lines, 1, CV_PI / 180, houghThreshold, minLineLength, maxLineGap);
 
     std::vector<cv::Vec4i> merged = MergeColinearClusters(lines);
 
@@ -143,3 +139,4 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     }
     return toExport;
 }
+

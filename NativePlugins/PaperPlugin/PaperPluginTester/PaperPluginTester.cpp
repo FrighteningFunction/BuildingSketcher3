@@ -144,7 +144,7 @@ void TestAndVisualizeLineDetection(const std::string& inputPath, const std::stri
 int main()
 {
     //TestAndVisualizePaperDetection("TestFiles/papertest2.jpg", "output_with_corners.png");
-	TestAndVisualizeLineDetection("TestFiles/linetest6.jpg", "output_with_lines.png");
+	TestAndVisualizeLineDetection("TestFiles/linetest8.png", "output_with_lines.png");
     return 0;
 }
 

@@ -8,6 +8,7 @@ using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.UI;
 using static UnityEngine.Rendering.GPUSort;
+using System.IO;
 
 [RequireComponent(typeof(ARCameraManager))]
 public class PaperDetector : MonoBehaviour
@@ -27,13 +28,13 @@ public class PaperDetector : MonoBehaviour
     private Texture2D camTex;
     private Vector2[] imgCorners;
     private Matrix4x4 D;
-    
+
 
     void OnGUI()
     {
-        paperEdgeLines.DrawWhiteDots(D, 
-            debugImage != null, 
-            imgCorners, 
+        paperEdgeLines.DrawWhiteDots(D,
+            debugImage != null,
+            imgCorners,
             camTex != null ? new Vector2(camTex.width, camTex.height) : Vector2.zero);
     }
 
@@ -51,7 +52,7 @@ public class PaperDetector : MonoBehaviour
 
         UpdateTexture(cpu);
 
-        if(!TryDetectPaperCorners()) return;
+        if (!TryDetectPaperCorners()) return;
 
         FetchDisplayMatrix(args);
 
@@ -97,7 +98,8 @@ public class PaperDetector : MonoBehaviour
         return viewportCorners;
     }
 
-    private void FetchDisplayMatrix(ARCameraFrameEventArgs args) {
+    private void FetchDisplayMatrix(ARCameraFrameEventArgs args)
+    {
         if (!args.displayMatrix.HasValue)
         {
             Debug.LogError(" No display matrix available.");
@@ -137,7 +139,7 @@ public class PaperDetector : MonoBehaviour
         {
             camTex = new Texture2D(img.width, img.height, TextureFormat.RGBA32, false);
             Debug.Log($"Created camTex: {img.width}x{img.height}");
-        }
+        }        
 
         using var buf = new NativeArray<byte>(img.GetConvertedDataSize(p), Allocator.Temp);
         img.Convert(p, buf);
@@ -146,8 +148,29 @@ public class PaperDetector : MonoBehaviour
 
         debugImage.texture = camTex;
         img.Dispose();
+
+        SaveCameraImage();
     }
 
+    private void SaveCameraImage()
+    {
+        var png = camTex.EncodeToPNG();
+
+#if UNITY_ANDROID
+        string path = Application.persistentDataPath + "/debug_cam.png";
+#else
+                string path = System.IO.Path.Combine(Application.dataPath, "debug_cam.png");
+#endif
+
+
+        if (!File.Exists(path))
+        {
+            System.IO.File.WriteAllBytes(path, png);
+            Debug.Log("Saved AR camera PNG to: " + path); 
+        }
+        
+      
+    }
 
 
     private void MarkCpuCornersOnTexture(Color32 dotColor, int dotSize = 7)
