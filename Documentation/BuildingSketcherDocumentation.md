@@ -5,8 +5,6 @@ Budapesti Műszaki és Gazdaságtudományi Egyetem
 
 Villamosmérnöki és Informatikai Kar
 
-Automatizálási és Alkalmazott Informatikai Tanszék
-
 Szokoly-Angyal Armand
 
 BuildingSketcher
@@ -42,7 +40,34 @@ pre verziókat alkalmazom, mert a korábbi verziókban egy olyan kritikus
 kompatibilitási probléma merült fel, amely miatt nem lehetett az
 XrCpuImage (lásd később) komponenst az AR Camera-ról lekérdezni, ezért
 kiemelem, hogy erre külön figyeljen oda az, aki ezt az eszközt
-fejleszteni szeretné.
+fejleszteni szeretné. Ezen túl a projekt alapbeállításai a hivatalos AR
+Foundation dokumentációja\[1\] szerint leírtakat követik.
 
-A projekt beállítása a hivatalos AR Foundation dokumentációja szerint
-leírtakat követi.
+A lap- valamint a vonaldetektálás a nyílt forráskódú OpenCV C++ könyvtár
+segítségével valósult meg. Létezik Unityben egy (2025-ben legalábbis)
+fizetős bővítmény is, ez a projekt azonban saját c++ megvalósításra
+fókuszál a projekt használati esetének egyedisége okán. Ezt a c++ kódot
+majd CMake és Gradle segítségével .so fájlba kell csomagolni, hogy a
+Unity tartalmazhassa a natív kódot a buildben, és C#-ban meghívhassuk (a
+részletes **ajánlott** developer flow-ról később).
+
+A „mérnöki kihívás" ebben a feladatban 2 fő problémára osztható fel:
+
+- A megfelelő OpenCV logika megvalósítása,
+
+- Majd annak megfelelő hozzákapcsolása a Unity csővezetékéhez, mely
+  alatt ezúttal a Unity AR Foundation beépített AR grafikai render
+  csővezetékét értem.
+
+Ez utóbbi probléma nem triviális, ugyanis egy olyan **koordináta
+konverziós csővezetéket** kell megvalósítanunk ehhez a Unity AR
+Foundation beépített koordináta-konverziós csővezetékével párhuzamosan,
+mely tökéletesen „másolja" azt. Ennek pontos folyamatáról később írok. A
+koordináta konverzió alatt ezúttal pontosan a 2D kamera képének az
+Android készülék képernyőjére, majd aszerint a Unity világba való
+transzformálását értem. A későbbiekben ennek a folyamatnak a fenti
+eszközökbe beépített részét az egyszerűség kedvéért „AR render
+csővezetéknek", vagy csak „Unity csővezetéknek" fogom hívni. Azt fontos
+előrevetítenem, hogy ez a feladat jelenleg **nincsen teljesen jól
+implementálva** ebben a programban, ami torzított AR megjelenítést
+eredményez, de az app még így is használható.
