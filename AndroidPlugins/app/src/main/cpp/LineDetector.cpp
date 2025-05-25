@@ -104,12 +104,12 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
 
 
-    cv::Mat blurred;
-    cv::GaussianBlur(gray, blurred, cv::Size(9, 9), 0);
+    //cv::Mat blurred;
+    //cv::GaussianBlur(gray, blurred, cv::Size(9, 9), 0);
 
 
     cv::Mat bw;
-    cv::adaptiveThreshold(blurred, bw, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY_INV, 21, 10);
+    cv::adaptiveThreshold(gray, bw, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY_INV, 21, 10);
 
     // Use Canny edge detector to emphasize edges
     cv::Mat edges;
