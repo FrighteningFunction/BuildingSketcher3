@@ -19,6 +19,7 @@ public class PaperDetector : MonoBehaviour
     [SerializeField] RawImage debugImage;
     [SerializeField] PipelineDebugger pipelineDebugger;
     [SerializeField] PaperEdgeLines paperEdgeLines;
+    [SerializeField] WallGenerator wallGenerator;
 
     [SerializeField] bool debugMode = true;
 
@@ -54,11 +55,14 @@ public class PaperDetector : MonoBehaviour
 
         FetchDisplayMatrix(args);
 
+
         Vector2[] viewportCorners = ConvertImageCornersToViewport();
+
 
         paperEdgeLines.PlaceLinesFromViewport(viewportCorners);
 
-       
+        wallGenerator.VisualizeLines(camTex, D, raycastManager);
+
         ExecuteDebug(viewportCorners);
     }
 
