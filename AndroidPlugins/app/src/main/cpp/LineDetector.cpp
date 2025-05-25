@@ -121,8 +121,8 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     // Use HoughLinesP to find straight lines
     std::vector<cv::Vec4i> lines;
 
-	int minLineLength = 250;
-	int maxLineGap = 50;
+	int minLineLength = 10;
+	int maxLineGap = 30;
     int houghThreshold = 90;
 
     cv::HoughLinesP(closed, lines, 1, CV_PI / 180, houghThreshold, minLineLength, maxLineGap);

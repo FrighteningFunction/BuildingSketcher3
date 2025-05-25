@@ -64,10 +64,10 @@ public class WallGenerator : MonoBehaviour
     {
         Vector2[][] detectedLinesArr;
 
-        int maxlines = 32;
+        const int MaxLines = 256;
 
         int numLines = PaperPlugin.FindBlackLines(
-            tex.GetRawTextureData(), tex.width, tex.height, out detectedLinesArr, maxlines);
+            tex.GetRawTextureData(), tex.width, tex.height, out detectedLinesArr, MaxLines);
 
         var results = new List<(Vector2, Vector2)>(numLines);
         for (int i = 0; i < numLines; ++i)
