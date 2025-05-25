@@ -33,10 +33,12 @@ public class WallGenerator : MonoBehaviour
             Vector3 p1_world = ViewportToARWorld(p1_viewport, raycastManager);
             Vector3 p2_world = ViewportToARWorld(p2_viewport, raycastManager);
 
+            Debug.Log($"Line viewport: {p1_viewport} -> {p2_viewport}, world: {p1_world} -> {p2_world}");
+
             // 3. Only instantiate if both endpoints could be placed
             if (p1_world == Vector3.zero || p2_world == Vector3.zero)
             {
-                Debug.LogWarning($"Line endpoint could not be raycasted to AR plane: {p1_world}, {p2_world}");
+                Debug.LogWarning($"MISSING: Line [{p1_viewport}] -> [{p2_viewport}], world [{p1_world}] -> [{p2_world}] could not be placed! ARPlane may be too small.");
                 continue;
             }
 
