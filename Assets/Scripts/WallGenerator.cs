@@ -17,6 +17,8 @@ public class WallGenerator : MonoBehaviour
         ARRaycastManager raycastManager,
         Vector2[] paperQuad = null)
     {
+        var innerQuad = QuadHelper.InsetQuad(paperQuad, 5f);   // 15 px margin – tweak as needed
+
         if (tex == null)
         {
             Debug.LogError("Texture2D is null!");
@@ -29,6 +31,14 @@ public class WallGenerator : MonoBehaviour
 
         foreach (var line in detectedLines)
         {
+
+            // test both endpoints in raw CPU pixel space
+            Vector2 A = line.Item1;
+            Vector2 B = line.Item2;
+
+            // keep only if BOTH endpoints are inside the (inset) quad
+            if (!QuadHelper.PointInQuad(A, innerQuad) || !QuadHelper.PointInQuad(B, innerQuad))
+                continue;                       // discard, no wall instantiated
 
             // 1. Pixel to viewport (normalized)
             Vector2 p1_viewport = Converter.FromRawCpuToViewport(displayMatrix, line.Item1, new Vector2(tex.width, tex.height));
