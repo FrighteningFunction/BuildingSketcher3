@@ -23,13 +23,6 @@ public class WallGenerator : MonoBehaviour
             return;
         }
 
-        // Don't show walls unless paper is found
-        if (paperQuad == null || paperQuad.Length != 4)
-        {
-            CleanupOldLines();
-            return;
-        }
-
         var detectedLines = DetectLines(tex);
 
         CleanupOldLines();
@@ -37,13 +30,9 @@ public class WallGenerator : MonoBehaviour
         foreach (var line in detectedLines)
         {
 
-            // Clip line to paper
-            if (!PaperPolygonClipper.ClipLineToQuad(line.Item1, line.Item2, paperQuad, out var clippedA, out var clippedB))
-                continue;
-
             // 1. Pixel to viewport (normalized)
-            Vector2 p1_viewport = Converter.FromRawCpuToViewport(displayMatrix, clippedA, new Vector2(tex.width, tex.height));
-            Vector2 p2_viewport = Converter.FromRawCpuToViewport(displayMatrix, clippedB, new Vector2(tex.width, tex.height));
+            Vector2 p1_viewport = Converter.FromRawCpuToViewport(displayMatrix, line.Item1, new Vector2(tex.width, tex.height));
+            Vector2 p2_viewport = Converter.FromRawCpuToViewport(displayMatrix, line.Item2, new Vector2(tex.width, tex.height));
 
             // 2. Viewport to AR world
             Vector3 p1_world = ViewportToARWorld(p1_viewport, raycastManager);
