@@ -542,8 +542,166 @@ sarokhoz olyan belső pontot számol, amely adott pixeltávolságra van az
 eredeti oldalszélektől. Az eredmény egy ugyanúgy rendezett négyszög,
 amely kisebb, de arányos az eredetivel.
 
-## Működés madártávlatból
+# Működés madártávlatból
+
+## Az alkalmazás működése
 
 Az alábbiakban áttekintem a program működését, azt, hogy az adat milyen
 stádiumokon megy át a feldolgozás során, hogy végül eljussunk a
-megjelenítésig.
+megjelenítésig. Ez a szakasz a konverzió könnyebb megértésére szolgál
+(kutatásaim során ilyen magyarázatokból nem találtam elegendőt az
+interneten, így ezt hiánypótolni kívánom), de teljesen visszafejthető ez
+a folyamat az implementációs részletekből is.
+
+![ábra 1 Az alkalmazás
+működése](media/media/image2.png){width="6.489583333333333in"
+height="3.65625in"}
+
+Mint ahogyan az az ábrán (ábra1) is látható, az adatfeldolgozás a kamera
+szenzorról beérkezett nyers kép (YUV_420_888 formátumban) „fogadásával"
+kezdődik (ennek pontos mikéntjéről, hogy ez pontosan hogyan történik, az
+implementáció fejezetben olvashatunk). A kapott kameraképet byte-okra
+bontva átadjuk a natív OpenCV pluginünknek, mely visszaadja a papír
+koordinátáit, valamint a kimutatott tollvonások egyeneseit egy tömbben.
+Ezeket a koordinátákat a kép koordináta rendszerében kaptuk meg, így
+ezeket normalizálnunk kell, hogy alkalmazhassuk a szükséges
+transzformációkat, hogy megkapjuk, ezek a pontok hol lesznek a készülék
+képernyőjén.
+
+Itt fontos előrevetítenem a technikai kihívást ebben a feladatban. A
+dolgunk az, hogy „lemásoljuk" azokat a transzformációkat, amiket az
+ARCameraBackground mintázatát előállító shader tesz az XRCpuImage-el
+(pontosabban fogalmazva az abból nyert textúrával, de az egyszerűség
+kedvéért ezt értem alatta), hogy a tartalmunkat hitelesen jeleníthessük
+meg a kamerakép feletti overlayben.
+
+Ahhoz, hogy a kamerakép úgy nézhessen ki, ahogy a Unity AR Android
+alkalmazásunkban háttérként látjuk, számos transzformációt kell
+végrehajtatnunk, melynek megértése a fent említett shader
+tanulmányozásával érhető el. A DisplayMatrix a dokumentáció alapján
+\[2\] tartalmazza ezeket a transzformációkat.
+
+Mint ahogy azt a kódban és az implementációs részletekben is láthattuk,
+az alkalmazásunk pontosan erre a mátrixra épít a koordináták
+előállításához, azonban egyben ez is okozza a Unity worldspace-ben a
+megjelenített tartalmunk torzított megjelenését (erről a problémák
+részben még írok).
+
+Miután az XRCpu kamera koordinátarendszeréből átkerültünk a Unity
+kamerájának view koordinátarendszerébe, használhatjuk a RayCastingot
+\[3\] hogy megkapjunk egy olyan Unity világbeli koordinátát, mely a
+kamerából kilőtt sugár legközelebbi metszéspontja egy detektált AR
+plane-nel, melyből már elő tudjuk állítani a 3D koordinátákat a
+megjelenítéshez.
+
+## A képfeldolgozás OpenCV-vel
+
+![ábra 2 A
+lapdetektálás](media/media/image3.png){width="4.739583333333333in"
+height="2.4791666666666665in"}
+
+Ahhoz, hogy a képen megfelelőképpen kimutathassuk az OpenCV eszközökkel
+a kontúrokat, először fekete-fehérré kell alakítanunk, majd a zaj
+eltávolítása érdekében 5-ös erősségű Gaussianblurt használunk. Ezután
+Canny edge detectiont hajtunk végre, kísérletezéseim szerint az 50 lower
+edge thresholdnak megfelelő, 150 pedig upper edgenek szintén az. Ez pont
+elég a papír széleinek kimutatásához, a zajra még nem túl érzékeny.
+
+A cv::findContours-al kinyerjük a képből a különböző alakzatokat, a
+RETR_EXTERNAL paraméter segítségével. Ez azért fontos, mert nekünk ebben
+a függvényben a belső részletek nem kellenek, vonalakat különállóan
+dolgozzuk fel, mely megfelelő.
+
+![A képen szöveg, diagram, képernyőkép, Betűtípus látható Előfordulhat,
+hogy a mesterséges intelligencia által létrehozott tartalom
+helytelen.](media/media/image4.png){width="5.010416666666667in"
+height="2.6770833333333335in"}Ezután végigválogatjuk a kinyert
+kontúrokat, megtartva csak azokat, melyek konvex négyszöget jelentenek,
+ezek közül is a legnagyobbat, feltételezve, hogy az jó eséllyel a papír
+lesz.
+
+ábra 3 A vonaldetektálás
+
+A fekete vonalak OpenCV-alapú detektálásához először a képet szintén
+szürkeárnyalatossá alakítjuk, majd GaussianBlur szűrőt alkalmazunk az
+apróbb zajok, textúrák eltüntetése érdekében (jelen esetben is egy
+5x5-ös ablakkal dolgozunk). Ezután az adaptív küszöbölés következik,
+amely minden képrészletet a helyi átlagtól függően tesz feketévé vagy
+fehérré; ez a papír különböző megvilágítási viszonyai mellett is kiemeli
+a rajzolt vonalakat.
+
+A bináris képen Canny edge detectort alkalmazunk, ahol a 50-es és 200-as
+küszöbértékekkel állapítjuk meg, mely élek számítanak tényleges
+kontúroknak. A jól látható élekből a HoughLinesP algoritmus segítségével
+vonalszegmenseket keresünk, melyek hosszát, összefüggését (minLineLength
+= 40 px, maxLineGap = 20 px) és találati küszöbét (houghThreshold = 40)
+külön paraméterekkel szabályozzuk. Az így kapott sok rövid, gyakran
+egymással párhuzamos, közel elhelyezkedő szegmenst a
+MergeColinearClusters függvénnyel összevonjuk. Itt a 7 foknál kisebb
+szögkülönbségű és 15 pixelnél közelebb eső szakaszokat egy csoportba
+rendezve, minden klaszterből egyetlen, hosszabb összekötő szakaszt
+generálunk. Végül a megmaradt, letisztított vonalszakaszokat a pipeline
+visszaadja további feldolgozásra vagy AR-vizualizációhoz.
+
+# Eredmények és problémák
+
+A projekt eredménye az volt, hogy egy stabil OpenCV C++ programot raktam
+össze, mely képes Android készülékek kameraképeiről egy papírt
+következetesen detektálni, valamint a rajta található vonalakat egy
+finomított OpenCV csővezeték alkalmazásával kimutatni, a zaj
+minimalizálásával. Ezt a létrehozott OpenCV bővítményt integráltam a
+Unity programba AR feldolgozás céljából úgy, hogy feltérképeztem a Unity
+AR pipeline koordinátakonverziójának mikéntjét, és összeállítottam egy
+olyan prototípust, mely az így kinyert adatokból képes az Android
+készülékére a detektált vonalakból falakat extrapolálni.
+
+**A nehézség**, amelybe ütköztem, az volt, hogy hogyan konvertáljak
+pontosan a kapott XrCpuImage kép koordinátarendszeréből a Unity Camera
+View koordinátarendszerébe. Ezt a folyamatot, mint azt korábban
+említettem, az AR Camera Background egy shader segítségével végzi el,
+hogy azt a hátteret jelenítse nekünk, melyet a Unity AR android
+használata során látunk. Hosszas kutakodás után sem találtam egyértelmű,
+hiteles vagy teljesen pontosan működő leírást arról, hogy ezt pontosan
+hogyan teszi, illetve hogyan tudnám ezt a konverziót Unity-ben
+megoldani. Magának a shadernek a megvizsgálása során az alábbi sort
+találtam:
+
+textureCoord = (\_UnityDisplayTransform \* vec4(gl_MultiTexCoord0.x,
+1.0f - gl_MultiTexCoord0.y, 1.0f, 0.0f)).xy;
+
+Ebből arra a következtetésre jutottam, amelyet a dokumentáció \[2\] is
+állít, miszerint a DisplayMatrix, melyet a ARCameraFrameEventArgs-ból
+nyerhetünk, tartalmazza a szükséges konverziókat ahhoz, hogy azokat a
+koordinátákat kapjuk meg, amiket az Android készülék képernyőjén
+láthatunk, miután a nyers kamera képről átkonvertáltuk őket. Ez a
+konverziós módszer azonban nem teljesen a várt eredményt hozta, egy
+ismeretlen mennyisséggel csökkenti a detektált papír méretét, illetve
+gyanúm szerint el is tolja. A papír pozíciója, orientációja megfelelő, a
+mérete az, amely nem tökéletes.
+
+A projektben ez a legnagyobb kihívás, jelenleg nem találtam erre
+pontosan működő módszert. Sajnos ezt a konverziót nem tudjuk kikerülni,
+mert az OpenCV működéséhez csak az XrCpuImage-et tudjuk felhasználni, a
+már létező ARCamerBackground másolására nem találtam hosszas kutakodás
+után sem ismert módszert.
+
+További probléma, hogy zárt, négyszög alakú rajzot jelenleg nem tudunk a
+papírra rajzolni úgy, hogy azt stabilan falakként detekálja, ugyanis az
+erős, markáns kontúrokat az arra rajzolt papír felettinek érzékeli a
+fentebb tárgyalt módszer miatt, ezért magát a rajzot érzékeli papírnak.
+Jelenleg egyéb alakzatok extrapolálhatóak a tollvonásokból.
+
+# Jövőbeli tervek
+
+A projekt jövőbeli tervei közé tartozik a fenti problémák megoldása
+elsősorban, valamint a szoftver továbbfejlesztése arra, hogy stabilan
+felhasználható legyen teljes alaprajzok extrapolálásra is. Terv, hogy a
+falak paraméterei szerkeszthetőek legyenek, ajtókat, ablakokat
+helyezhessünk beléjük interaktív UI felületen keresztül. A lapdetekálás
+stabilitásának megoldásához megfelelő megoldás lehet markerek használata
+az instabil OpenCV detektálás helyett, csupán a vonalak detektálását
+hagyjuk az OpenCV „vállán". A natív kódot tovább lehetne finomítani
+potenciális, stabilabb eredmények elérése érdekében más fényviszonyok
+között is, bár ez esetben technológiai korlátok is szóba jöhetnek.
+
+# 
