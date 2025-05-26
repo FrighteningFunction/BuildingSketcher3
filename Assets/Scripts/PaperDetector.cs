@@ -37,7 +37,8 @@ public class PaperDetector : MonoBehaviour
             paperEdgeLines.DrawWhiteDots(D,
                 debugImage != null,
                 imgCorners,
-                camTex != null ? new Vector2(camTex.width, camTex.height) : Vector2.zero); 
+                camTex != null ? new Vector2(camTex.width, camTex.height) : Vector2.zero);
+            Debug.Log("Drawing white dots on texture.");
         }
     }
 

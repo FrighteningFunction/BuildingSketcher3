@@ -31,6 +31,10 @@ alaprajz megjelenítésére, azonban további finomítással (melyet a
 jövőbeli tervekben részletezek) megvalósítható az is, hogy komplexebb
 alaprajzokat interaktívan módosítsunk.
 
+![ábra 1 Az alkalmazás működés
+közben](media/media/image2.jpeg){width="2.299407261592301in"
+height="4.979166666666667in"}
+
 # Technológiai háttér
 
 Az alkalmazás Unity 6 (6000.0.43f1) editor használatával, az AR
@@ -65,12 +69,9 @@ Foundation beépített koordináta-konverziós csővezetékével párhuzamosan,
 mely tökéletesen „másolja" azt. Ennek pontos folyamatáról később írok. A
 koordináta konverzió alatt ezúttal pontosan a 2D kamera képének az
 Android készülék képernyőjére, majd aszerint a Unity világba való
-transzformálását értem. A későbbiekben ennek a folyamatnak a fenti
-eszközökbe beépített részét az egyszerűség kedvéért „AR render
-csővezetéknek", vagy csak „Unity csővezetéknek" fogom hívni. Azt fontos
-előrevetítenem, hogy ez a feladat jelenleg **nincsen teljesen jól
-implementálva** ebben a programban, ami torzított AR megjelenítést
-eredményez, de az app még így is használható.
+transzformálását értem. Azt fontos előrevetítenem, hogy ez a feladat
+jelenleg **nincsen teljesen jól implementálva** ebben a programban, ami
+torzított AR megjelenítést eredményez, de az app még így is használható.
 
 # Implementáció
 
@@ -79,7 +80,7 @@ eredményez, de az app még így is használható.
 A cél egy olyan egyszerűen használható API létrehozása volt, mely képes
 egy kapott képről kinyerni egy papír sarkainak koordinátáit a kép
 koordinátarendszerében (bal felső az origin), valamint az összes fellelt
-vonás két végének koordinátáit.
+vonás két végeinek koordinátáit.
 
 ### LineDetector.cpp
 
@@ -213,14 +214,14 @@ A program betölt egy bemeneti képet, meghívja a plugin függvényeket,
 majd az eredményt vizuálisan ábrázolja (pontokkal, vonalakkal) és fájlba
 is menti.
 
-A repository tartalmaz pár gépileg előállított, illetve valós képet
-tesztelésre mind vonal, mind papírdetektáláshoz.
+A repository tartalmaz a TestFiles mappában pár gépileg előállított,
+illetve valós képet tesztelésre mind vonal, mind papírdetektáláshoz.
 
 #### EnsureBGR
 
 cv::Mat EnsureBGR(const cv::Mat& img)
 
-> **Feladata:**
+**Feladata:**
 
 Segédfüggvény, amely bármilyen csatornaszámú képből (pl. RGBA,
 grayscale) BGR képet készít megjelenítéshez vagy mentéshez.
@@ -553,8 +554,8 @@ megjelenítésig. Ez a szakasz a konverzió könnyebb megértésére szolgál
 interneten, így ezt hiánypótolni kívánom), de teljesen visszafejthető ez
 a folyamat az implementációs részletekből is.
 
-![ábra 1 Az alkalmazás
-működése](media/media/image2.png){width="6.489583333333333in"
+![ábra 2 Az alkalmazás
+működése](media/media/image3.png){width="6.489583333333333in"
 height="3.65625in"}
 
 Mint ahogyan az az ábrán (ábra1) is látható, az adatfeldolgozás a kamera
@@ -596,8 +597,8 @@ megjelenítéshez.
 
 ## A képfeldolgozás OpenCV-vel
 
-![ábra 2 A
-lapdetektálás](media/media/image3.png){width="4.739583333333333in"
+![ábra 3 A
+lapdetektálás](media/media/image4.png){width="4.739583333333333in"
 height="2.4791666666666665in"}
 
 Ahhoz, hogy a képen megfelelőképpen kimutathassuk az OpenCV eszközökkel
@@ -614,13 +615,13 @@ dolgozzuk fel, mely megfelelő.
 
 ![A képen szöveg, diagram, képernyőkép, Betűtípus látható Előfordulhat,
 hogy a mesterséges intelligencia által létrehozott tartalom
-helytelen.](media/media/image4.png){width="5.010416666666667in"
+helytelen.](media/media/image5.png){width="5.010416666666667in"
 height="2.6770833333333335in"}Ezután végigválogatjuk a kinyert
 kontúrokat, megtartva csak azokat, melyek konvex négyszöget jelentenek,
 ezek közül is a legnagyobbat, feltételezve, hogy az jó eséllyel a papír
 lesz.
 
-ábra 3 A vonaldetektálás
+ábra 4 A vonaldetektálás
 
 A fekete vonalak OpenCV-alapú detektálásához először a képet szintén
 szürkeárnyalatossá alakítjuk, majd GaussianBlur szűrőt alkalmazunk az
@@ -659,12 +660,11 @@ készülékére a detektált vonalakból falakat extrapolálni.
 pontosan a kapott XrCpuImage kép koordinátarendszeréből a Unity Camera
 View koordinátarendszerébe. Ezt a folyamatot, mint azt korábban
 említettem, az AR Camera Background egy shader segítségével végzi el,
-hogy azt a hátteret jelenítse nekünk, melyet a Unity AR android
+hogy azt a hátteret jelenítse meg nekünk, melyet a Unity AR android
 használata során látunk. Hosszas kutakodás után sem találtam egyértelmű,
-hiteles vagy teljesen pontosan működő leírást arról, hogy ezt pontosan
-hogyan teszi, illetve hogyan tudnám ezt a konverziót Unity-ben
-megoldani. Magának a shadernek a megvizsgálása során az alábbi sort
-találtam:
+hiteles leírást arról, hogy ezt pontosan hogyan teszi, illetve hogyan
+tudnám ezt a konverziót Unity-ben megoldani. Magának a shadernek a
+megvizsgálása során az alábbi sort találtam:
 
 textureCoord = (\_UnityDisplayTransform \* vec4(gl_MultiTexCoord0.x,
 1.0f - gl_MultiTexCoord0.y, 1.0f, 0.0f)).xy;
@@ -704,4 +704,17 @@ hagyjuk az OpenCV „vállán". A natív kódot tovább lehetne finomítani
 potenciális, stabilabb eredmények elérése érdekében más fényviszonyok
 között is, bár ez esetben technológiai korlátok is szóba jöhetnek.
 
-# 
+# Hivatkozások
+
+\[1\] „Project Setup \| AR Foundation \| 6.1.0". Elérés: 2025. május 25.
+\[Online\]. Elérhető:
+https://docs.unity3d.com/Packages/com.unity.xr.arfoundation@6.1/manual/project-setup/project-setup.html
+
+\[2\] „Display matrix format and derivation \| AR Foundation \| 6.0.5".
+Elérés: 2025. május 26. \[Online\]. Elérhető:
+https://docs.unity3d.com/Packages/com.unity.xr.arfoundation@6.0/manual/features/camera/display-matrix-format-and-derivation.html
+
+\[3\] U. Technologies, „Unity - Scripting API:
+Camera.ViewportPointToRay". Elérés: 2025. május 26. \[Online\].
+Elérhető:
+https://docs.unity3d.com/6000.1/Documentation/ScriptReference/Camera.ViewportPointToRay.html
