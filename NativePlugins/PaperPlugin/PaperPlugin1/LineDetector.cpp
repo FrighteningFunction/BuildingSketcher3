@@ -4,12 +4,10 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 
-// ---------------------------------------------------------------------------
-// Merge HoughLinesP segments that are nearly parallel *and* close together.
+// Merge HoughLinesP segments that are nearly parallel and close together.
 // Each output line is (x1,y1,x2,y2).
 // angleTolDeg  – max angle difference for grouping   (e.g. 5–7°)
 // distTolPx    – max distance between two lines to be considered the same
-// ---------------------------------------------------------------------------
 static std::vector<cv::Vec4i>
 MergeColinearClusters(const std::vector<cv::Vec4i>& segs,
     double angleTolDeg = 7.0,
@@ -107,7 +105,6 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
     else
         cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
 
-    // **NO normalize or equalize here!**
     cv::Mat blurred;
     cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
 
@@ -116,9 +113,6 @@ int FindBlackLines(unsigned char* imageData, int width, int height, float* outLi
 
     cv::Mat edges;
     cv::Canny(bw, edges, 50, 200, 3);
-
-    // For debugging: save edges
-    // cv::imwrite("edges.png", edges);
 
     std::vector<cv::Vec4i> lines;
     int minLineLength = 40;

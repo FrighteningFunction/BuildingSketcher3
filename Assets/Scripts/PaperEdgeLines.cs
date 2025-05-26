@@ -129,23 +129,22 @@ public class PaperEdgeLines : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             int j = (i + 1) % 4;
-            DrawSegment(i, j, worldPos, usedFallback);
+            DrawSegment(i, j, worldPos);
         }
     }
 
     // Helper: Draw a single segment (line) between two world points.
-    private void DrawSegment(int i, int j, Vector3[] worldPos, bool[] usedFallback)
+    private void DrawSegment(int i, int j, Vector3[] worldPos)
     {
         var seg = segments[i];
         seg.lr.enabled = true;
         seg.lr.SetPosition(0, worldPos[i]);
         seg.lr.SetPosition(1, worldPos[j]);
-
-        bool anyFallback = usedFallback[i] || usedFallback[j];
-        Color col = anyFallback ? Color.yellow : Color.blue;
+        
+        Color col = Color.blue;
         seg.lr.startColor = seg.lr.endColor = col;
 
-        Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2} Color: {(anyFallback ? "YELLOW" : "BLUE")}");
+        Debug.Log($"Segment[{i}] From {worldPos[i]:F2} to {worldPos[j]:F2}");
     }
 
 }

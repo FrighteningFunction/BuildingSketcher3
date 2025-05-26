@@ -1,4 +1,4 @@
-﻿// PaperPlugin.cpp
+﻿// PaperPlugin1.cpp
 
 #include "pch.h"
 
@@ -24,8 +24,6 @@ bool FindPaperCorners(unsigned char* imageData,
     // 1. Edge or adaptive threshold
     cv::Mat edges;
     cv::Canny(gray, edges, 50, 150);              
-    // Alternatively:
-    // cv::threshold(gray, edges, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
     // 2. Find contours on the binary mask
     std::vector<std::vector<cv::Point>> contours;

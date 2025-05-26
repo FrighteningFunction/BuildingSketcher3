@@ -148,28 +148,6 @@ public class PaperDetector : MonoBehaviour
 
         debugImage.texture = camTex;
         img.Dispose();
-
-        SaveCameraImage();
-    }
-
-    private void SaveCameraImage()
-    {
-        var png = camTex.EncodeToPNG();
-
-#if UNITY_ANDROID
-        string path = Application.persistentDataPath + "/debug_cam.png";
-#else
-                string path = System.IO.Path.Combine(Application.dataPath, "debug_cam.png");
-#endif
-
-
-        if (!File.Exists(path))
-        {
-            System.IO.File.WriteAllBytes(path, png);
-            Debug.Log("Saved AR camera PNG to: " + path); 
-        }
-        
-      
     }
 
 
