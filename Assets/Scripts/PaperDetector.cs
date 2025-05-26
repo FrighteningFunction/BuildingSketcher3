@@ -22,7 +22,7 @@ public class PaperDetector : MonoBehaviour
     [SerializeField] PaperEdgeLines paperEdgeLines;
     [SerializeField] WallGenerator wallGenerator;
 
-    [SerializeField] bool debugMode = true;
+    [SerializeField] bool debugMode = false;
 
     /* ---------- internals ---------- */
     private Texture2D camTex;
@@ -32,13 +32,26 @@ public class PaperDetector : MonoBehaviour
 
     void OnGUI()
     {
-        paperEdgeLines.DrawWhiteDots(D,
-            debugImage != null,
-            imgCorners,
-            camTex != null ? new Vector2(camTex.width, camTex.height) : Vector2.zero);
+        if (debugMode)
+        {
+            paperEdgeLines.DrawWhiteDots(D,
+                debugImage != null,
+                imgCorners,
+                camTex != null ? new Vector2(camTex.width, camTex.height) : Vector2.zero); 
+        }
     }
 
-    void OnEnable() => cameraManager.frameReceived += OnFrame;
+    void OnEnable()
+    {
+        cameraManager.frameReceived += OnFrame;
+
+        debugImage.enabled = debugMode;
+
+        if (debugMode)
+        {
+            Debug.Log("DebugMode turned on.");
+        }
+    }
     void OnDisable() => cameraManager.frameReceived -= OnFrame;
 
     void OnFrame(ARCameraFrameEventArgs args)
@@ -123,7 +136,7 @@ public class PaperDetector : MonoBehaviour
 
         pipelineDebugger.printDisplayMatrix(D);
 
-        MarkCpuCornersOnTexture(new Color32(255, 0, 0, 255));
+       MarkCpuCornersOnTexture(new Color32(255, 0, 0, 255));
     }
 
     private void UpdateTexture(XRCpuImage img)
@@ -139,14 +152,15 @@ public class PaperDetector : MonoBehaviour
         {
             camTex = new Texture2D(img.width, img.height, TextureFormat.RGBA32, false);
             Debug.Log($"Created camTex: {img.width}x{img.height}");
-        }        
+        }
 
         using var buf = new NativeArray<byte>(img.GetConvertedDataSize(p), Allocator.Temp);
         img.Convert(p, buf);
         camTex.LoadRawTextureData(buf);
         camTex.Apply();
 
-        debugImage.texture = camTex;
+        if(debugMode) debugImage.texture = camTex;
+
         img.Dispose();
     }
 

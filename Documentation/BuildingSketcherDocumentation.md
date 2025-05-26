@@ -31,7 +31,7 @@ alaprajz megjelenítésére, azonban további finomítással (melyet a
 jövőbeli tervekben részletezek) megvalósítható az is, hogy komplexebb
 alaprajzokat interaktívan módosítsunk.
 
-# Technológiai háttér és a mérnöki kihívás
+# Technológiai háttér
 
 Az alkalmazás Unity 6 (6000.0.43f1) editor használatával, az AR
 Foundation (6.2.0-pre.4 - May 06, 2025) és a Google AR Core XR plugin

@@ -10,27 +10,18 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ARCameraManager))]
 public class PaperEdgeLines : MonoBehaviour
 {
-
-
     [SerializeField] ARRaycastManager raycastManager;
     [SerializeField] ARPlaneManager arPlaneManager;
-    [SerializeField] bool debugMode = true;
-
-
 
     [Header("Line Settings")]
     [SerializeField] Material lineMaterial;
     [SerializeField] float lineWidth = 0.005f;
 
-
     private lineSegment[] segments = new lineSegment[4];
     private static readonly List<ARRaycastHit> hits = new();
 
 
-
     private Texture2D whiteDot;
-
-
 
     struct lineSegment
     {
@@ -44,13 +35,11 @@ public class PaperEdgeLines : MonoBehaviour
         InitLines();
 
         lineMaterial.renderQueue = 3100;
-
-        if (debugMode)
-        {
-            whiteDot = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            whiteDot.SetPixel(0, 0, Color.white);
-            whiteDot.Apply();
-        }
+        
+        // Add debugMode guards for optimization, for simplicity we initialize it anyway.
+        whiteDot = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        whiteDot.SetPixel(0, 0, Color.white);
+        whiteDot.Apply();
 
 
         Debug.Log("PaperDetector initialized.");
@@ -58,7 +47,6 @@ public class PaperEdgeLines : MonoBehaviour
 
     public void DrawWhiteDots(Matrix4x4 D, bool firstFrame, Vector2[] imgCorners, Vector2 camTexSize)
     {
-        if (!firstFrame || !debugMode) return;
 
         if (imgCorners == null || imgCorners.Length == 0)
         {
